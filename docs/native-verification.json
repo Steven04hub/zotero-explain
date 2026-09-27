@@ -1,0 +1,139 @@
+{
+  "version": "10.0.4",
+  "checks": [
+    {
+      "name": "Tools menu",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Native panel",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "App Server initialized",
+      "ok": true,
+      "detail": "登录 ChatGPT 后即可开始"
+    },
+    {
+      "name": "Isolated signed-out account",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "No startup error",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Reader listener",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Selection action",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Selected passage transferred",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Paper metadata transferred",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Generation disabled until login",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: logged-in state",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: model list",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: streamed explanation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: text is not executable HTML",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: followup enabled",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: conversation reused for followup",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: generation recovered idle state",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: stopping during thread creation prevents generation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: stopped startup restores controls",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: new selection prevents stale generation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: logout gates requests",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Disable cleanup: menu removed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Disable cleanup: reader listener removed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Disable cleanup: window closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Disable cleanup: transport closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Re-enable restores plugin",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "panel": {
+    "width": 680,
+    "height": 711
+  }
+}

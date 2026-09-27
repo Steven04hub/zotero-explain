@@ -1,0 +1,11 @@
+.dev/
+node_modules/
+.DS_Store
+*.log
+.env
+.env.*
+
+# Keep the current distributable alongside source; older local builds stay ignored.
+dist/*
+!dist/zotero-explain-0.3.0.xpi
+!dist/SHA256SUMS

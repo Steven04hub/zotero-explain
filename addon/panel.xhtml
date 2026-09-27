@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="color-scheme" content="light dark" />
+  <title>论文解释</title>
+  <link rel="stylesheet" href="chrome://zotero-explain/content/panel.css?v=0.3.0" />
+  <script src="chrome://zotero-explain/content/panel.js?v=0.3.0" defer="defer"></script>
+</head>
+<body>
+  <header class="toolbar"><h1>论文解释</h1><span class="service">ChatGPT</span><button id="close" class="icon-button" aria-label="关闭解释窗口" title="关闭（⌘W）">×</button></header>
+  <main>
+    <section class="account" aria-label="账号">
+      <span id="accountState" role="status">正在连接…</span>
+      <button id="login" class="quiet">登录 ChatGPT</button><button id="cancelLogin" class="quiet" hidden="hidden">取消登录</button>
+    </section>
+    <p id="error" class="error" role="alert" hidden="hidden"></p>
+    <section class="source-section">
+      <div class="label-row"><label for="passage">原文</label><span id="page" class="muted"></span></div>
+      <p id="paperTitle" class="paper-title"></p>
+      <textarea id="passage" rows="3" maxlength="16000" placeholder="在论文中选中句子，或在这里粘贴文字。"></textarea>
+      <details class="context-details"><summary>补充上下文</summary><textarea id="context" rows="2" maxlength="24000" placeholder="可选：前后段落、公式定义等。"></textarea></details>
+    </section>
+    <div class="controls">
+      <input id="model" type="hidden" value="gpt-6-sol" />
+      <button id="modelToggle" class="model-toggle" aria-label="选择模型" aria-haspopup="listbox" aria-expanded="false" aria-controls="modelMenu"><span id="modelLabel">GPT-6 Sol</span><span class="chevron" aria-hidden="true">⌄</span></button>
+      <input id="effort" type="hidden" value="medium" />
+      <button id="effortToggle" class="effort-toggle" aria-label="选择思考度" aria-haspopup="listbox" aria-expanded="false" aria-controls="effortMenu"><span id="effortLabel">中等</span><span class="chevron" aria-hidden="true">⌄</span></button>
+      <button id="explain" class="primary">解释</button><button id="stop" hidden="hidden">停止</button>
+    </div>
+    <p class="privacy">仅发送所选原文、标题与补充上下文</p>
+    <section class="response-section">
+      <div class="label-row"><h2>解释</h2><button id="copy" class="quiet" disabled="disabled">复制</button></div>
+      <div id="messages" class="messages"><p class="empty">选一句话，让理解更进一步。</p></div>
+      <p id="status" class="muted" role="status" aria-live="polite"></p>
+      <form id="followupForm"><input id="followup" maxlength="8000" placeholder="继续追问…" aria-label="继续追问" disabled="disabled" /><button id="send" type="submit" aria-label="发送追问" disabled="disabled">↑</button></form>
+    </section>
+    <details class="settings"><summary>账号与设置</summary>
+      <p>通过官方 Codex 服务解释，使用账号的 Codex 额度，无须 API Key。</p>
+      <div class="row"><button id="logout" hidden="hidden">退出登录</button><button id="reconnect">重新连接</button></div>
+      <label for="codexPath">Codex 运行程序</label><div class="row"><input id="codexPath" placeholder="留空则自动查找" /><button id="savePath">保存</button></div>
+      <small>登录在系统浏览器完成，独立于 Codex 桌面应用。</small>
+    </details>
+  </main>
+  <div id="modelMenu" class="model-menu" role="listbox" aria-label="模型" hidden="hidden"></div>
+  <div id="effortMenu" class="model-menu effort-menu" role="listbox" aria-label="思考度" hidden="hidden"></div>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "manifest_version": 2,
+  "name": "论文解释 · ChatGPT",
+  "version": "0.3.0",
+  "description": "选中论文句子，用 ChatGPT 账号登录后解释与追问，无需 API Key（使用 Codex 额度）。",
+  "applications": {
+    "zotero": {
+      "id": "zotero-explain@local",
+      "update_url": "https://zotero-explain.invalid/updates.json",
+      "strict_min_version": "10.0",
+      "strict_max_version": "10.0.*"
+    }
+  }
+}
