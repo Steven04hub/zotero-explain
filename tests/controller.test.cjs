@@ -3,10 +3,28 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const fs = require('node:fs');
 
+test('hot upgrade replaces stale callbacks without removing other plugins', () => {
+  const Reader = { _registeredListeners: [
+    { type: 'renderTextSelectionPopup', handler() {}, pluginID: 'test' },
+    { type: 'renderTextSelectionPopup', handler() {}, pluginID: 'other' },
+  ],
+  unregisterEventListener(type, handler) {
+    this._registeredListeners = this._registeredListeners.filter(x => x.type !== type || x.handler !== handler);
+  },
+  registerEventListener(type, handler, pluginID) { this._registeredListeners.push({ type, handler, pluginID }); } };
+  const other = Reader._registeredListeners[1], old = Reader._registeredListeners[0];
+  const context = vm.createContext({ Zotero: { Reader } });
+  vm.runInContext(fs.readFileSync('addon/controller.js', 'utf8'), context);
+  context.ZEController.init('test');
+  assert.equal(Reader._registeredListeners.length, 2);
+  assert.ok(Reader._registeredListeners.includes(other));
+  assert.ok(!Reader._registeredListeners.includes(old));
+});
+
 function owner() {
   let focusCount = 0;
   const events = new Map();
-  const win = { closed: false, fullScreen: true,
+  const win = { closed: false, fullScreen: true, innerWidth: 1400, innerHeight: 900,
     addEventListener: (type, fn) => events.set(type, fn),
     removeEventListener: type => events.delete(type),
     unload() { events.get('unload')?.(); },
@@ -16,6 +34,7 @@ function owner() {
   function node(tag) {
     const handlers = new Map();
     return { tag, ownerDocument: doc, children: [], style: {}, isConnected: false,
+      getBoundingClientRect() { const left = parseFloat(this.style.left) || 0, top = parseFloat(this.style.top) || 0; const width = parseFloat(this.style.width) || 462, height = parseFloat(this.style.height) || 602; return { left, top, width, height, right: left + width, bottom: top + height }; },
       setAttribute() {}, addEventListener: (type, fn) => handlers.set(type, fn),
       emit(type) { handlers.get(type)?.({ preventDefault() {}, stopPropagation() {} }); },
       appendChild(child) { child.parent = this; child.isConnected = this.isConnected; this.children.push(child); },
@@ -48,15 +67,16 @@ function setup() {
     Reader: { registerEventListener: (_, fn) => { listener = fn; }, unregisterEventListener: () => { listener = null; } },
   } };
   vm.createContext(context);
+  vm.runInContext(fs.readFileSync('addon/layout.js', 'utf8'), context);
   vm.runInContext(fs.readFileSync('addon/controller.js', 'utf8'), context);
   const controller = context.ZEController;
   controller.init('test');
   return { main, readerWindow, controller,
     frame: win => win.document.getElementById('zotero-explain-panel')?.children[0],
-    select(win, text = 'Selected sentence') {
+    select(win, text = 'Selected sentence', readerOptions = {}) {
       let button;
-      listener({ reader: { itemID: 1, _window: win }, doc: main.document,
-        params: { annotation: { text } }, append: value => { button = value; } });
+      listener({ reader: { itemID: 1, _window: win, ...readerOptions }, doc: main.document,
+        params: { annotation: { text, position: { pageIndex: 0, rects: [[0, 0, 1, 1]] } } }, append: value => { button = value; } });
       button.emit('click');
     },
   };
@@ -68,6 +88,27 @@ test('selection in a detached reader opens inside that reader and preserves full
   assert.equal(e.frame(e.main), undefined);
   assert.equal(e.readerWindow.fullScreen, true);
   assert.equal(e.frame(e.readerWindow).ZEBridge.selection.text, 'Selected sentence');
+});
+
+test('dragging moves the panel while keeping it within the owner window', () => {
+  const e = setup(); e.select(e.main); const frame = e.frame(e.main);
+  frame.ZEBridge.beginMove({ x: 1000, y: 150 });
+  frame.ZEBridge.move({ x: 500, y: 250 }); frame.ZEBridge.endMove();
+  const box = frame.parent.getBoundingClientRect();
+  assert.equal(box.left, 426); assert.equal(box.top, 172);
+  frame.ZEBridge.beginMove({ x: 500, y: 250 }); frame.ZEBridge.move({ x: -5000, y: -5000 });
+  assert.equal(frame.parent.getBoundingClientRect().left, 12);
+  assert.equal(e.main.fullScreen, true);
+});
+
+test('PDF selection uses the active split view and relocates an already-open panel', () => {
+  const e = setup();
+  const view = { _iframeWindow: e.main, getClientRectForPopup: () => [900, 180, 1250, 440] };
+  e.select(e.main, 'Right column', { _internalReader: { _lastViewPrimary: false, _secondaryView: view } });
+  assert.ok(e.frame(e.main).parent.getBoundingClientRect().right <= 888);
+  view.getClientRectForPopup = () => [50, 180, 550, 440];
+  e.select(e.main, 'Left column', { _internalReader: { _primaryView: view } });
+  assert.ok(e.frame(e.main).parent.getBoundingClientRect().left >= 562);
 });
 
 test('repeated selection reuses the embedded panel, including selection before its script loads', () => {

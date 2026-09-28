@@ -1,11 +1,11 @@
 {
   "name": "zotero-explain",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "private": true,
   "description": "Explain selected paper passages in Zotero with ChatGPT account sign-in via Codex App Server",
   "scripts": {
     "test": "node --test tests/*.test.cjs",
     "build": "python3 scripts/build.py",
-    "check": "node --check addon/bootstrap.js && node --check addon/core.js && node --check addon/platform.js && node --check addon/controller.js && node --check addon/panel.js"
+    "check": "node --check addon/bootstrap.js && node --check addon/core.js && node --check addon/platform.js && node --check addon/layout.js && node --check addon/controller.js && node --check addon/panel.js"
   }
 }

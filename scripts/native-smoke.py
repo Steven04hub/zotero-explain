@@ -98,6 +98,31 @@ async function startup() {
       record('Default layout fits without horizontal scroll', doc.documentElement.scrollWidth === panel.innerWidth);
       record('Current compact stylesheet loaded', panel.getComputedStyle(doc.querySelector('.toolbar')).height === '44px');
       record('Default layout needs no outer scrolling', doc.querySelector('main').scrollHeight <= doc.querySelector('main').clientHeight + 1);
+      // Synthetic selection geometry exercises native frame positioning and drag handlers.
+      let selectionBox = [win.innerWidth - 380, 160, win.innerWidth - 40, 450];
+      const geometryReader = { itemID: item.id, _window: win, _internalReader: { _primaryView: {
+        _iframeWindow: win, getClientRectForPopup: () => selectionBox,
+      } } };
+      const chooseGeometry = text => {
+        let action;
+        listener.handler({ reader: geometryReader, doc: win.document,
+          params: { annotation: { text, position: { pageIndex: 0, rects: [[1, 1, 2, 2]] } } }, append: value => { action = value; } });
+        action.click();
+      };
+      chooseGeometry('Right column'); await Zotero.Promise.delay(50);
+      record('Geometry: right selection stays visible', host.getBoundingClientRect().right <= selectionBox[0] - 12);
+      selectionBox = [30, 160, 380, 450]; chooseGeometry('Left column'); await Zotero.Promise.delay(50);
+      record('Geometry: left selection stays visible', host.getBoundingClientRect().left >= selectionBox[2] + 12);
+      const titlebar = doc.querySelector('.toolbar');
+      const beforeDrag = host.getBoundingClientRect();
+      titlebar.dispatchEvent(new panel.PointerEvent('pointerdown', { button: 0, pointerId: 11, screenX: 1000, screenY: 200, bubbles: true }));
+      titlebar.dispatchEvent(new panel.PointerEvent('pointermove', { pointerId: 11, screenX: 950, screenY: 250, bubbles: true }));
+      titlebar.dispatchEvent(new panel.PointerEvent('pointerup', { pointerId: 11, bubbles: true }));
+      const afterDrag = host.getBoundingClientRect();
+      record('Native titlebar drag moves panel', afterDrag.left !== beforeDrag.left || afterDrag.top !== beforeDrag.top);
+      record('Dragging preserves selection visibility and fullscreen', afterDrag.left >= selectionBox[2] + 12 && win.fullScreen);
+      titlebar.dispatchEvent(new panel.KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+      record('Keyboard can move titlebar', host.getBoundingClientRect().top > afterDrag.top);
       // A separately labelled fake backend checks the real native UI without an account.
       const bridge = panel.frameElement.ZEBridge;
       const realStart = bridge.platform.start;
@@ -194,6 +219,27 @@ async function startup() {
       record('Reopen restores selected effort', reopened?.document.getElementById('effort').value === 'high');
       reopened.document.getElementById('close').click();
       record('Close button removes only the panel', !win.document.getElementById('zotero-explain-panel') && !win.closed && win.fullScreen);
+      const reserve = win.document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
+      reserve.style.cssText = 'position:fixed;left:30px;top:120px;width:800px;height:600px;display:flex';
+      const browser = win.document.createElementNS('http://www.w3.org/1999/xhtml', 'iframe');
+      browser.style.cssText = 'flex:1;min-width:0;border:0;margin-right:9px';
+      reserve.append(browser); win.document.documentElement.append(reserve);
+      geometryReader._iframe = browser;
+      selectionBox = [0, 0, win.innerWidth, win.innerHeight];
+      const originalMargin = browser.style.marginRight;
+      const beforeReserve = browser.getBoundingClientRect().width;
+      // Refresh listener after disabling/re-enabling the addon.
+      const newListener = Zotero.Reader._registeredListeners.find(x => x.pluginID === 'zotero-explain@local' && x.type === 'renderTextSelectionPopup');
+      let reserveAction;
+      newListener.handler({ reader: geometryReader, doc: win.document,
+        params: { annotation: { text: 'Crowded viewport', position: { pageIndex: 0, rects: [[1, 1, 2, 2]] } } }, append: value => { reserveAction = value; } });
+      reserveAction.click(); await Zotero.Promise.delay(500);
+      const reservedHost = win.document.getElementById('zotero-explain-panel');
+      record('Crowded layout reserves reader space', browser.getBoundingClientRect().width < beforeReserve);
+      record('Reserved panel does not overlay reader', reservedHost.getBoundingClientRect().left >= browser.getBoundingClientRect().right);
+      win.document.getElementById('zotero-explain-frame').contentWindow.document.getElementById('close').click();
+      record('Closing restores original reader margin', browser.style.marginRight === originalMargin);
+      reserve.remove();
       menu = win.document.getElementById('zotero-explain-menu');
       menu.doCommand(); await Zotero.Promise.delay(500);
       reopened = win.document.getElementById('zotero-explain-frame')?.contentWindow;

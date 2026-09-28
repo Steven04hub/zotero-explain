@@ -1,4 +1,4 @@
-var ZECore, ZEPlatform, ZEController;
+var ZECore, ZEPlatform, ZELayout, ZEController;
 var chromeHandle;
 
 async function startup({ id, version, rootURI }) {
@@ -8,8 +8,8 @@ async function startup({ id, version, rootURI }) {
   chromeHandle = startupService.registerChrome(Services.io.newURI(rootURI + "manifest.json"), [
     ["content", "zotero-explain", rootURI],
   ]);
-  for (const file of ["core.js", "platform.js", "controller.js"]) {
-    Services.scriptloader.loadSubScript(rootURI + file);
+  for (const file of ["core.js", "platform.js", "layout.js", "controller.js"]) {
+    Services.scriptloader.loadSubScriptWithOptions(rootURI + file + "?v=" + encodeURIComponent(version), { ignoreCache: true });
   }
   ZEController.init(id);
   for (const window of Zotero.getMainWindows()) ZEController.addMenu(window);
@@ -20,7 +20,7 @@ async function shutdown() {
   await ZEController?.shutdown();
   await ZEPlatform?.stop(true);
   chromeHandle?.destruct();
-  ZEController = ZEPlatform = ZECore = undefined;
+  ZEController = ZELayout = ZEPlatform = ZECore = undefined;
 }
 function install() {}
 function uninstall() {}

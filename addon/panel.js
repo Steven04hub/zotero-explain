@@ -1,7 +1,8 @@
 "use strict";
 var ZEPanel;
 window.addEventListener("DOMContentLoaded", () => {
-  const { core, platform, selection, close: closePanel } = window.frameElement.ZEBridge;
+  const bridge = window.frameElement.ZEBridge;
+  const { core, platform, selection, close: closePanel } = bridge;
   const $ = id => document.getElementById(id);
   let rpc = null, off = null, account = null, loginID = null;
   let conversation = null, busy = false, connecting = false, epoch = 0, title = "", lastAnswer = "";
@@ -215,6 +216,38 @@ window.addEventListener("DOMContentLoaded", () => {
     },
   };
   $("close").addEventListener("click", closePanel);
+  const toolbar = document.querySelector(".toolbar");
+  let movingPointer = null;
+  toolbar.addEventListener("pointerdown", event => {
+    if (event.button !== 0 || event.target.closest("button")) return;
+    event.preventDefault();
+    movingPointer = event.pointerId;
+    bridge.beginMove({ x: event.screenX, y: event.screenY });
+    try { toolbar.setPointerCapture(event.pointerId); } catch (_) {}
+    toolbar.classList.add("dragging");
+  });
+  toolbar.addEventListener("pointermove", event => {
+    if (event.pointerId !== movingPointer) return;
+    // Screen coordinates remain stable as the containing iframe moves.
+    bridge.move({ x: event.screenX, y: event.screenY });
+  });
+  const endMove = () => {
+    if (movingPointer === null) return;
+    const id = movingPointer; movingPointer = null;
+    bridge.endMove(); toolbar.classList.remove("dragging");
+    if (toolbar.hasPointerCapture(id)) toolbar.releasePointerCapture(id);
+  };
+  toolbar.addEventListener("pointerup", endMove);
+  toolbar.addEventListener("pointercancel", endMove);
+  toolbar.addEventListener("lostpointercapture", endMove);
+  window.addEventListener("blur", endMove);
+  toolbar.addEventListener("keydown", event => {
+    if (event.target !== toolbar) return;
+    const delta = { ArrowLeft: [-20, 0], ArrowRight: [20, 0], ArrowUp: [0, -20], ArrowDown: [0, 20] }[event.key];
+    if (!delta) return;
+    event.preventDefault(); event.stopPropagation();
+    bridge.beginMove({ x: 0, y: 0 }); bridge.move({ x: delta[0], y: delta[1] }); bridge.endMove();
+  });
   for (const kind of ["model", "effort"]) {
     $(kind + "Toggle").addEventListener("click", () => $(kind + "Menu").hidden ? openMenu(kind) : closeMenu(kind, true));
     $(kind + "Toggle").addEventListener("keydown", event => {

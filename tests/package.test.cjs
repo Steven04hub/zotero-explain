@@ -9,6 +9,6 @@ test('Zotero-required manifest metadata and native entry point are present', () 
   assert.equal(app.strict_max_version, '10.0.*');
   assert.ok(new URL(app.update_url).hostname.endsWith('.invalid'));
   const files = readdirSync('addon');
-  for (const file of ['bootstrap.js', 'core.js', 'platform.js', 'controller.js', 'panel.xhtml', 'panel.js', 'panel.css']) assert.ok(files.includes(file));
+  for (const file of ['bootstrap.js', 'core.js', 'platform.js', 'layout.js', 'controller.js', 'panel.xhtml', 'panel.js', 'panel.css']) assert.ok(files.includes(file));
   for (const file of files) assert.ok(!/auth|token|schema|test/.test(file));
 });

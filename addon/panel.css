@@ -3,6 +3,11 @@
 html, body { height: 100%; overflow: hidden; }
 body { margin: 0; background: var(--bg); color: var(--ink); font: 13px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
 .toolbar { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; background: linear-gradient(#ffffffb3, #ffffff40); border-bottom: 1px solid var(--line); }
+.toolbar { cursor: grab; user-select: none; touch-action: none; }
+.toolbar.dragging { cursor: grabbing; }
+.toolbar:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }
+.drag-hint { color: var(--muted); margin-left: auto; font-size: 16px; }
+.toolbar .icon-button { margin-left: 3px; }
 h1 { font-size: 14px; font-weight: 600; letter-spacing: -.2px; margin: 0; }
 .service { color: var(--muted); font-size: 11px; }
 main { height: calc(100% - 44px); padding: 8px 16px 10px; display: flex; flex-direction: column; gap: 9px; overflow: auto; }
