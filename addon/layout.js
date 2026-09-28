@@ -11,10 +11,10 @@ var ZELayout = (() => {
   function intersect(a, b) {
     return rect([Math.max(a.left, b.left), Math.max(a.top, b.top), Math.min(a.right, b.right), Math.min(a.bottom, b.bottom)]);
   }
-  function place(width, height, anchor, preferred) {
+  function place(width, height, anchor, preferred, size = { width: 462, height: 602 }) {
     const bounds = rect([12, 12, width - 12, height - 12]);
     if (!bounds) return null;
-    const w = Math.min(462, bounds.width), h = Math.min(602, bounds.height);
+    const w = Math.min(size.width, bounds.width), h = Math.min(size.height, bounds.height);
     const desired = preferred || { left: bounds.right - w, top: Math.min(72, bounds.bottom - h) };
     const blocked = anchor && intersect(bounds, rect([anchor.left - 12, anchor.top - 12, anchor.right + 12, anchor.bottom + 12]));
     const fit = (area, fw, fh) => ({ left: clamp(desired.left, area.left, area.right - fw),

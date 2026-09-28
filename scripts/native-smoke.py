@@ -123,6 +123,16 @@ async function startup() {
       record('Dragging preserves selection visibility and fullscreen', afterDrag.left >= selectionBox[2] + 12 && win.fullScreen);
       titlebar.dispatchEvent(new panel.KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
       record('Keyboard can move titlebar', host.getBoundingClientRect().top > afterDrag.top);
+      const beforeCrossing = host.getBoundingClientRect();
+      titlebar.dispatchEvent(new panel.PointerEvent('pointerdown', { button: 0, pointerId: 12, screenX: 1000, screenY: 200, bubbles: true }));
+      titlebar.dispatchEvent(new panel.PointerEvent('pointermove', { pointerId: 12, screenX: 1000 + 30 - beforeCrossing.left, screenY: 200, bubbles: true }));
+      titlebar.dispatchEvent(new panel.PointerEvent('pointerup', { pointerId: 12, bubbles: true }));
+      record('Manual drag can cross selected text to the left', Math.abs(host.getBoundingClientRect().left - 30) <= 1);
+      win.dispatchEvent(new win.Event('scroll')); win.dispatchEvent(new win.Event('resize'));
+      await Zotero.Promise.delay(100);
+      record('Scroll and resize preserve manual placement', Math.abs(host.getBoundingClientRect().left - 30) <= 1);
+      chooseGeometry('New left selection'); await Zotero.Promise.delay(50);
+      record('New selection resumes automatic avoidance', host.getBoundingClientRect().left >= selectionBox[2] + 12);
       // A separately labelled fake backend checks the real native UI without an account.
       const bridge = panel.frameElement.ZEBridge;
       const realStart = bridge.platform.start;
@@ -237,6 +247,14 @@ async function startup() {
       const reservedHost = win.document.getElementById('zotero-explain-panel');
       record('Crowded layout reserves reader space', browser.getBoundingClientRect().width < beforeReserve);
       record('Reserved panel does not overlay reader', reservedHost.getBoundingClientRect().left >= browser.getBoundingClientRect().right);
+      const dockedBridge = win.document.getElementById('zotero-explain-frame').ZEBridge;
+      const dockedBox = reservedHost.getBoundingClientRect();
+      dockedBridge.beginMove({ x: 1000, y: 200 });
+      dockedBridge.move({ x: 1000 + 30 - dockedBox.left, y: 200 }); dockedBridge.endMove();
+      record('Docked panel can be dragged to the left', Math.abs(reservedHost.getBoundingClientRect().left - 30) <= 1);
+      record('Undocking restores reader and preserves panel size', browser.style.marginRight === originalMargin && reservedHost.getBoundingClientRect().width === dockedBox.width);
+      win.dispatchEvent(new win.Event('scroll')); await Zotero.Promise.delay(100);
+      record('Scrolling does not redock a manually moved panel', browser.style.marginRight === originalMargin && Math.abs(reservedHost.getBoundingClientRect().left - 30) <= 1);
       win.document.getElementById('zotero-explain-frame').contentWindow.document.getElementById('close').click();
       record('Closing restores original reader margin', browser.style.marginRight === originalMargin);
       reserve.remove();

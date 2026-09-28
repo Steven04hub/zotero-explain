@@ -16,6 +16,12 @@ The plugin uses the **official Codex App Server** and your account's **Codex acc
 - Start with **GPT-6 Sol / medium** when no preferences have been saved.
 - Use a compact panel embedded in the current reader window, with a maximum content size of 460 × 600, light and dark appearances, no minimization, and no opening animation. It stays with the paper in macOS fullscreen mode and shrinks to fit smaller windows.
 
+## 0.3.4: Free dragging
+
+- Manual dragging takes priority over selection avoidance, so the panel can cross selected text and move freely to either side of the window.
+- Dragging out of the reserved right sidebar restores the reader area and preserves the panel's size, clamped to the window bounds.
+- The manual position survives scrolling, resizing, and reopening the same selection. Selecting a different passage restores automatic avoidance.
+
 ## 0.3.3: Movable panel and selection avoidance
 
 - Drag the title bar or six-dot handle to move the panel; focus the title bar and use arrow keys for keyboard movement. Movement stays within the window bounds.
@@ -41,7 +47,7 @@ Windows discovery is covered by simulated tests; Windows and Linux have not been
 
 ## Install and use
 
-1. Download [`zotero-explain-0.3.3.xpi`](dist/zotero-explain-0.3.3.xpi), or build it from source. Checksums are provided in [`dist/SHA256SUMS`](dist/SHA256SUMS).
+1. Download [`zotero-explain-0.3.4.xpi`](dist/zotero-explain-0.3.4.xpi), or build it from source. Checksums are provided in [`dist/SHA256SUMS`](dist/SHA256SUMS).
 2. In Zotero, open **Tools → Plugins**. Drag the XPI into the window, or use the gear menu's **Install Plugin From File…** option.
 3. Open **Tools → 论文解释 · ChatGPT**, then click **登录 ChatGPT** (“Sign in to ChatGPT”). Complete sign-in on the official OpenAI page in your browser and return to Zotero.
 4. Open a PDF, select a sentence or passage, and click **✦ 用 ChatGPT 解释** in the selection popup.
@@ -120,6 +126,8 @@ The test instance exits after writing `.dev/native-result.json`. Run the same Zo
 `node scripts/probe-codex.cjs` checks real App Server initialization, signed-out account state, official login URL generation, and login cancellation. It uses an isolated configuration, does not open a browser, and does not submit model requests.
 
 ### Verification
+
+For **0.3.4**, 50 automated tests, 65 macOS native checks, and 7 separate-process restart checks passed. Updated the installed plugin and verified dragging across a real PDF selection from right to left without snapping back. Reports: [native](docs/native-verification-0.3.4.json) / [restart](docs/restart-verification-0.3.4.json).
 
 For **0.3.3**, 47 automated tests, 59 macOS native checks, and 7 separate-process restart checks passed. A real PDF was used to verify right-column selection avoidance, title-bar dragging, and automatic repositioning for a new selection. Reports: [native](docs/native-verification-0.3.3.json) / [restart](docs/restart-verification-0.3.3.json).
 

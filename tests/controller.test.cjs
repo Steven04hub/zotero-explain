@@ -24,10 +24,19 @@ test('hot upgrade replaces stale callbacks without removing other plugins', () =
 function owner() {
   let focusCount = 0;
   const events = new Map();
+  const frames = new Map(); let nextFrame = 0;
   const win = { closed: false, fullScreen: true, innerWidth: 1400, innerHeight: 900,
-    addEventListener: (type, fn) => events.set(type, fn),
-    removeEventListener: type => events.delete(type),
-    unload() { events.get('unload')?.(); },
+    addEventListener(type, fn) {
+      if (!events.has(type)) events.set(type, new Set());
+      events.get(type).add(fn);
+    },
+    removeEventListener(type, fn) { events.get(type)?.delete(fn); },
+    emit(type) { for (const fn of events.get(type) || []) fn(); },
+    requestAnimationFrame(fn) { frames.set(++nextFrame, fn); return nextFrame; },
+    cancelAnimationFrame(id) { frames.delete(id); },
+    flushFrames() { const pending = [...frames.values()]; frames.clear(); pending.forEach(fn => fn()); },
+    getComputedStyle: node => node.style,
+    unload() { win.emit('unload'); },
     openDialog() { throw new Error('Must not create a native window'); },
     get focusCount() { return focusCount; },
   };
@@ -110,6 +119,60 @@ test('PDF selection uses the active split view and relocates an already-open pan
   e.select(e.main, 'Left column', { _internalReader: { _primaryView: view } });
   assert.ok(e.frame(e.main).parent.getBoundingClientRect().left >= 562);
 });
+
+test('manual drag crosses a selected column and stays there until a new selection', () => {
+  const e = setup(), win = e.main;
+  const source = { reader: {}, sourceWindow: win, key: 'first',
+    anchor: () => ({ left: 50, top: 180, right: 550, bottom: 440 }) };
+  e.controller.open({ text: 'First selection' }, win, source);
+  const frame = e.frame(win), bridge = frame.ZEBridge;
+  const before = frame.parent.getBoundingClientRect();
+  bridge.beginMove({ x: 1000, y: 150 });
+  bridge.move({ x: 1000 + 40 - before.left, y: 150 }); bridge.endMove();
+  const moved = frame.parent.getBoundingClientRect();
+  assert.equal(moved.left, 40);
+  assert.equal(moved.width, before.width);
+  win.emit('scroll'); win.flushFrames(); win.emit('resize');
+  assert.equal(frame.parent.getBoundingClientRect().left, 40);
+  // Zotero can render the same selection popup again; this must not snap back.
+  e.controller.open({ text: 'First selection' }, win, { ...source });
+  assert.equal(frame.parent.getBoundingClientRect().left, 40);
+  e.controller.open({ text: 'Next selection' }, win, { ...source, key: 'next' });
+  assert.ok(frame.parent.getBoundingClientRect().left >= 562);
+});
+
+for (const missingGeometry of [true, false]) {
+  test(`dragging releases right docking with ${missingGeometry ? 'missing geometry' : 'a crowded selection'}`, () => {
+    const e = setup(), win = e.main;
+    const browser = { isConnected: true, style: { marginRight: '9px' },
+      getBoundingClientRect() {
+        const right = 1390 - parseFloat(this.style.marginRight);
+        return { left: 20, right, top: 80, bottom: 890, width: right - 20, height: 810 };
+      } };
+    const source = { reader: { _iframe: browser }, sourceWindow: win, key: 'first',
+      anchor: () => missingGeometry ? null : { left: 20, top: 80, right: 1380, bottom: 880 } };
+    e.controller.open({ text: 'Selected text' }, win, source);
+    const frame = e.frame(win), bridge = frame.ZEBridge;
+    const before = frame.parent.getBoundingClientRect();
+    assert.notEqual(browser.style.marginRight, '9px');
+    // A click without movement should leave automatic docking alone.
+    bridge.beginMove({ x: 1000, y: 150 }); bridge.move({ x: 1000, y: 150 }); bridge.endMove();
+    assert.notEqual(browser.style.marginRight, '9px');
+    bridge.beginMove({ x: 1000, y: 150 });
+    bridge.move({ x: 1000 + 30 - before.left, y: 180 }); bridge.endMove();
+    assert.equal(browser.style.marginRight, '9px');
+    assert.equal(frame.parent.getBoundingClientRect().left, 30);
+    assert.equal(frame.parent.getBoundingClientRect().width, before.width);
+    win.emit('scroll'); win.flushFrames(); win.emit('resize');
+    assert.equal(frame.parent.getBoundingClientRect().left, 30);
+    assert.equal(browser.style.marginRight, '9px');
+    win.innerWidth = 400; win.innerHeight = 450; win.emit('resize');
+    const small = frame.parent.getBoundingClientRect();
+    assert.ok(small.left >= 12 && small.right <= 388 && small.top >= 12 && small.bottom <= 438);
+    bridge.close(); win.flushFrames();
+    assert.equal(browser.style.marginRight, '9px');
+  });
+}
 
 test('repeated selection reuses the embedded panel, including selection before its script loads', () => {
   const e = setup(); e.select(e.main);

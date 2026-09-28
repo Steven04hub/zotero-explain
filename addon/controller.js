@@ -40,10 +40,15 @@ var ZEController = (() => {
     if (panel !== entry) return;
     const { owner, host } = entry;
     let box;
-    const anchor = entry.source?.anchor();
-    if (!entry.dock) box = ZELayout.place(owner.innerWidth, owner.innerHeight, anchor, preferred);
+    // Explicit movement takes priority over automatic selection avoidance. Keep
+    // it until a different selection arrives, including across scroll/resize.
+    const anchor = entry.manual ? null : entry.source?.anchor();
+    if (entry.manual) {
+      restoreReader(entry);
+      box = ZELayout.place(owner.innerWidth, owner.innerHeight, null, preferred, entry.manualSize);
+    } else if (!entry.dock) box = ZELayout.place(owner.innerWidth, owner.innerHeight, anchor, preferred);
     // If selection geometry is unavailable, use reserved space instead of guessing.
-    if ((!box || (entry.source?.reader._iframe && !anchor)) && !entry.dock) {
+    if (!entry.manual && (!box || (entry.source?.reader._iframe && !anchor)) && !entry.dock) {
       const browser = entry.source?.reader._iframe;
       if (browser?.isConnected) {
         const before = browser.getBoundingClientRect();
@@ -68,6 +73,8 @@ var ZEController = (() => {
     if (source && entry.source?.reader === source.reader && entry.source?.key === source.key
       && entry.source?.sourceWindow === source.sourceWindow) return;
     entry.unwatch?.(); restoreReader(entry);
+    entry.manual = false;
+    entry.manualSize = null;
     entry.source = source;
     const target = source?.sourceWindow;
     const changed = () => {
@@ -130,13 +137,17 @@ var ZEController = (() => {
       onUnload: () => { if (panel === entry) close(false); } };
     frame.ZEBridge = { core: ZECore, platform: ZEPlatform, selection: current,
       beginMove(point) {
+        if (panel !== entry) return;
         const box = host.getBoundingClientRect();
-        entry.drag = { x: point.x, y: point.y, left: box.left, top: box.top };
+        entry.drag = { x: point.x, y: point.y, left: box.left, top: box.top,
+          width: box.width, height: box.height };
       },
       move(point) {
         if (panel !== entry || !entry.drag) return;
+        if (point.x === entry.drag.x && point.y === entry.drag.y && !entry.manual) return;
         const desired = { left: entry.drag.left + point.x - entry.drag.x, top: entry.drag.top + point.y - entry.drag.y };
-        if (entry.dock) restoreReader(entry);
+        entry.manual = true;
+        entry.manualSize = { width: entry.drag.width, height: entry.drag.height };
         entry.preferred = desired; position(entry, desired);
       },
       endMove() { entry.drag = null; },
@@ -144,7 +155,7 @@ var ZEController = (() => {
     frame.addEventListener("load", () => {
       if (panel === entry) frame.contentWindow.focus();
     }, { once: true });
-    frame.src = "chrome://zotero-explain/content/panel.xhtml?v=0.3.3";
+    frame.src = "chrome://zotero-explain/content/panel.xhtml?v=0.3.4";
     host.appendChild(frame);
     panel = entry;
     owner.addEventListener("unload", entry.onUnload, { once: true });

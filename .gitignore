@@ -12,3 +12,4 @@ dist/*
 !dist/SHA256SUMS
 !dist/zotero-explain-0.3.2.xpi
 !dist/zotero-explain-0.3.3.xpi
+!dist/zotero-explain-0.3.4.xpi
