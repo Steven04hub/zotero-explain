@@ -30,12 +30,6 @@ var ZEController = (() => {
       },
     };
   }
-  function restoreReader(entry) {
-    if (entry.dock) {
-      entry.dock.browser.style.marginRight = entry.dock.margin;
-      entry.dock = null;
-    }
-  }
   function position(entry, preferred = entry.preferred) {
     if (panel !== entry) return;
     const { owner, host } = entry;
@@ -44,35 +38,28 @@ var ZEController = (() => {
     // it until a different selection arrives, including across scroll/resize.
     const anchor = entry.manual ? null : entry.source?.anchor();
     if (entry.manual) {
-      restoreReader(entry);
       box = ZELayout.place(owner.innerWidth, owner.innerHeight, null, preferred, entry.manualSize);
-    } else if (!entry.dock) box = ZELayout.place(owner.innerWidth, owner.innerHeight, anchor, preferred, entry.userSize);
-    // If selection geometry is unavailable, use reserved space instead of guessing.
-    if (!entry.manual && (!box || (entry.source?.reader._iframe && !anchor)) && !entry.dock) {
-      const browser = entry.source?.reader._iframe;
-      if (browser?.isConnected) {
-        const before = browser.getBoundingClientRect();
-        const width = Math.min(entry.userSize?.width ?? 462, Math.max(250, before.width * 0.45));
-        entry.dock = { browser, margin: browser.style.marginRight, width };
-        const margin = parseFloat(owner.getComputedStyle(browser).marginRight) || 0;
-        browser.style.marginRight = `${margin + width + 16}px`;
+    } else {
+      // Offscreen selections have no geometry. Keep the existing floating
+      // position instead of shrinking the entire reader into a permanent rail.
+      const desired = preferred || (!anchor && entry.placed ? host.getBoundingClientRect() : undefined);
+      box = ZELayout.place(owner.innerWidth, owner.innerHeight, anchor, desired, entry.userSize);
+      if (!box) {
+        const compact = { width: Math.min(entry.userSize?.width ?? 462, 322),
+          height: Math.min(entry.userSize?.height ?? 602, 262) };
+        box = ZELayout.place(owner.innerWidth, owner.innerHeight, anchor, desired, compact)
+          || ZELayout.place(owner.innerWidth, owner.innerHeight, null, desired, compact);
       }
     }
-    if (entry.dock) {
-      const reader = entry.dock.browser.getBoundingClientRect();
-      const height = Math.min(entry.userSize?.height ?? 602, owner.innerHeight - Math.max(12, reader.top) - 12);
-      const top = Math.max(Math.max(12, reader.top), Math.min(preferred?.top ?? reader.top, owner.innerHeight - height - 12));
-      box = { left: reader.right + 12, top, width: entry.dock.width, height };
-    }
-    box ||= ZELayout.place(owner.innerWidth, owner.innerHeight, null, preferred, entry.userSize);
     if (!box) return;
     Object.assign(host.style, { left: `${box.left}px`, top: `${box.top}px`, right: "auto",
       width: `${box.width}px`, height: `${box.height}px` });
+    entry.placed = true;
   }
   function watchSelection(entry, source) {
     if (source && entry.source?.reader === source.reader && entry.source?.key === source.key
       && entry.source?.sourceWindow === source.sourceWindow) return;
-    entry.unwatch?.(); restoreReader(entry);
+    entry.unwatch?.();
     entry.manual = false;
     entry.manualSize = null;
     entry.drag = entry.resize = null;
@@ -103,7 +90,7 @@ var ZEController = (() => {
     old.owner.removeEventListener("unload", old.onUnload);
     old.owner.removeEventListener("resize", old.onResize);
     if (old.pendingFrame) old.owner.cancelAnimationFrame(old.pendingFrame);
-    old.unwatch?.(); restoreReader(old);
+    old.unwatch?.();
     old.frame.contentWindow?.ZEPanel?.dispose();
     old.host.remove();
     if (restoreFocus && !old.owner.closed) old.previousFocus?.focus();
@@ -175,7 +162,7 @@ var ZEController = (() => {
     frame.addEventListener("load", () => {
       if (panel === entry) frame.contentWindow.focus();
     }, { once: true });
-    frame.src = "chrome://zotero-explain/content/panel.xhtml?v=0.3.5-final";
+    frame.src = "chrome://zotero-explain/content/panel.xhtml?v=0.3.6";
     host.appendChild(frame);
     panel = entry;
     owner.addEventListener("unload", entry.onUnload, { once: true });

@@ -142,7 +142,7 @@ test('manual drag crosses a selected column and stays there until a new selectio
 });
 
 for (const missingGeometry of [true, false]) {
-  test(`dragging releases right docking with ${missingGeometry ? 'missing geometry' : 'a crowded selection'}`, () => {
+  test(`floating panel never changes reader width with ${missingGeometry ? 'missing geometry' : 'a crowded selection'}`, () => {
     const e = setup(), win = e.main;
     const browser = { isConnected: true, style: { marginRight: '9px' },
       getBoundingClientRect() {
@@ -154,10 +154,10 @@ for (const missingGeometry of [true, false]) {
     e.controller.open({ text: 'Selected text' }, win, source);
     const frame = e.frame(win), bridge = frame.ZEBridge;
     const before = frame.parent.getBoundingClientRect();
-    assert.notEqual(browser.style.marginRight, '9px');
-    // A click without movement should leave automatic docking alone.
+    assert.equal(browser.style.marginRight, '9px');
+    // A click without movement must not reserve any reader space.
     bridge.beginMove({ x: 1000, y: 150 }); bridge.move({ x: 1000, y: 150 }); bridge.endMove();
-    assert.notEqual(browser.style.marginRight, '9px');
+    assert.equal(browser.style.marginRight, '9px');
     bridge.beginMove({ x: 1000, y: 150 });
     bridge.move({ x: 1000 + 30 - before.left, y: 180 }); bridge.endMove();
     assert.equal(browser.style.marginRight, '9px');
@@ -209,7 +209,7 @@ test('resized dimensions survive movement, scrolling and new selection avoidance
   assert.equal(e.frame(win), undefined);
 });
 
-test('resizing a docked panel releases reserved reader space without snapping back', () => {
+test('resizing a floating panel preserves the full reader width', () => {
   const e = setup(), win = e.main;
   const browser = { isConnected: true, style: { marginRight: '9px' },
     getBoundingClientRect() {
@@ -224,6 +224,30 @@ test('resizing a docked panel releases reserved reader space without snapping ba
   assert.equal(frame.parent.getBoundingClientRect().width, before.width + 60);
   win.emit('scroll'); win.flushFrames();
   assert.equal(frame.parent.getBoundingClientRect().width, before.width + 60);
+});
+
+test('scrolling the selection out of view never creates a full-height reader gutter', () => {
+  const e = setup(), win = e.main;
+  const style = {};
+  Object.defineProperty(style, 'marginRight', {
+    get: () => '9px', set() { assert.fail('Panel must never change the reader margin'); },
+  });
+  const browser = { isConnected: true, style,
+    getBoundingClientRect: () => ({ left: 20, top: 80, right: 1380, bottom: 890, width: 1360, height: 810 }) };
+  let anchor = { left: 900, top: 180, right: 1250, bottom: 440 };
+  const source = { reader: { _iframe: browser }, sourceWindow: win, key: 'first', anchor: () => anchor };
+  e.controller.open({ text: 'Visible selection' }, win, source);
+  const frame = e.frame(win), before = frame.parent.getBoundingClientRect();
+  anchor = null; win.emit('scroll'); win.flushFrames();
+  assert.equal(frame.parent.getBoundingClientRect().left, before.left);
+  win.emit('resize'); win.flushFrames();
+  // Switching to an impossible selection can only resize the panel itself.
+  anchor = { left: 20, top: 80, right: 1380, bottom: 880 };
+  e.controller.open({ text: 'Whole page' }, win, { ...source, key: 'next' });
+  const compact = frame.parent.getBoundingClientRect();
+  assert.equal(compact.width, 322); assert.equal(compact.height, 262);
+  assert.equal(browser.getBoundingClientRect().width, 1360);
+  frame.ZEBridge.close();
 });
 
 test('changing reader owners disposes the old panel and ignores its late close callback', () => {

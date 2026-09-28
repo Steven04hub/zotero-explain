@@ -16,6 +16,12 @@ The plugin uses the **official Codex App Server** and your account's **Codex acc
 - Start with **GPT-6 Sol / medium** when no preferences have been saved.
 - Use a compact panel embedded in the current reader window, with a default content size of 460 × 600, light and dark appearances, no minimization, and no opening animation. It stays with the paper in macOS fullscreen mode and shrinks to fit smaller windows.
 
+## 0.3.6: Remove the blank area below the panel
+
+- The panel always floats over the reader. It no longer reserves a full-height sidebar, so the paper remains visible below and around the panel.
+- When a selection scrolls offscreen or its geometry is unavailable, retain the floating position without changing the reader width.
+- Crowded layouts shrink only the panel. If a selection fills the viewport and cannot be completely avoided, the panel remains floating and can be moved manually. Edge resizing and automatic avoidance for new selections remain available.
+
 ## 0.3.5: Resize from every edge
 
 - Drag any of the four edges to expand or shrink the panel; corners resize both dimensions. The lower-right corner has a visible resize hint.
@@ -54,7 +60,7 @@ Windows discovery is covered by simulated tests; Windows and Linux have not been
 
 ## Install and use
 
-1. Download [`zotero-explain-0.3.5.xpi`](dist/zotero-explain-0.3.5.xpi), or build it from source. Checksums are provided in [`dist/SHA256SUMS`](dist/SHA256SUMS).
+1. Download [`zotero-explain-0.3.6.xpi`](dist/zotero-explain-0.3.6.xpi), or build it from source. Checksums are provided in [`dist/SHA256SUMS`](dist/SHA256SUMS).
 2. In Zotero, open **Tools → Plugins**. Drag the XPI into the window, or use the gear menu's **Install Plugin From File…** option.
 3. Open **Tools → 论文解释 · ChatGPT**, then click **登录 ChatGPT** (“Sign in to ChatGPT”). Complete sign-in on the official OpenAI page in your browser and return to Zotero.
 4. Open a PDF, select a sentence or passage, and click **✦ 用 ChatGPT 解释** in the selection popup.
@@ -133,6 +139,8 @@ The test instance exits after writing `.dev/native-result.json`. Run the same Zo
 `node scripts/probe-codex.cjs` checks real App Server initialization, signed-out account state, official login URL generation, and login cancellation. It uses an isolated configuration, does not open a browser, and does not submit model requests.
 
 ### Verification
+
+For **0.3.6**, 55 automated tests and 99 macOS native checks passed. Verified in the installed plugin that scrolling a selection offscreen and shortening the panel leave the paper visible underneath. Report: [native](docs/native-verification-0.3.6.json).
 
 For **0.3.5**, 54 automated tests, 98 macOS native checks, and 7 separate-process restart checks passed. Installed and verified consecutive top/right edge drags in the actual Zotero window. Reports: [native](docs/native-verification-0.3.5.json) / [restart](docs/restart-verification-0.3.5.json).
 

@@ -59,7 +59,7 @@ test('an unobstructed user position is preserved and offscreen drags are clamped
   assert.ok(edge.left >= 12 && edge.top + edge.height <= 688);
 });
 
-test('crowded viewport requests reserved space instead of overlapping selected text', () => {
+test('crowded viewport reports that no nonoverlapping placement fits', () => {
   assert.equal(layout.place(700, 650, layout.rect([50, 80, 660, 580])), null);
 });
 
