@@ -1,0 +1,499 @@
+{
+  "version": "10.0.4",
+  "checks": [
+    {
+      "name": "Tools menu",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Embedded panel",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Reader remains fullscreen",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Opening explanation creates no native window",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "App Server initialized",
+      "ok": true,
+      "detail": "登录 ChatGPT 后即可开始"
+    },
+    {
+      "name": "Isolated signed-out account",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "No startup error",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Reader listener",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Selection action",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Selected passage transferred",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Paper metadata transferred",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Generation disabled until login",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Compact panel fits screen",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Panel lives inside reader window",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Panel has no opening animation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Default model is GPT-6 Sol",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Default layout fits without horizontal scroll",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Current compact stylesheet loaded",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Default layout needs no outer scrolling",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Geometry: right selection stays visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Geometry: left selection stays visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Native titlebar drag moves panel",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Dragging preserves selection visibility and fullscreen",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Keyboard can move titlebar",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Manual drag can cross selected text to the left",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Scroll and resize preserve manual placement",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "New selection resumes automatic avoidance",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Eight resize handles available",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Resize hit target: n",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Resize inward: n",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Resize outward: n",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Resize hit target: s",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Resize inward: s",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Resize outward: s",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Resize hit target: e",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Resize inward: e",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Resize outward: e",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Resize hit target: w",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Resize inward: w",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Resize outward: w",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Resize hit target: ne",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Resize inward: ne",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Resize outward: ne",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Resize hit target: nw",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Resize inward: nw",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Resize outward: nw",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Resize hit target: se",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Resize inward: se",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Resize outward: se",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Resize hit target: sw",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Resize inward: sw",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Resize outward: sw",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Minimum panel size",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Narrow panel has no horizontal overflow",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Short panel content remains scrollable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Cancelled resize stops tracking",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "New selection preserves requested size",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Hover after a missed pointer release stops resizing",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Synthetic native drag resizes and release outside handle stops it",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Resize keeps reader fullscreen",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: logged-in state",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: model list without duplicates",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: model menu opens",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: model selection updates label and value",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: model compatibility adjusts effort",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: model and effort saved together",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: effort menu opens with model capabilities",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: effort selection updates label and persists",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: requested default model and medium effort",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: streamed explanation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: text is not executable HTML",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: followup enabled",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: conversation reused for followup",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: changed model applies to followup",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: changed effort applies to followup",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: generation recovered idle state",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: stopping during thread creation prevents generation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: stopped startup restores controls",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: new selection prevents stale generation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: logout gates requests",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Mock UI: logout retains generation preferences",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Disable cleanup: menu removed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Disable cleanup: reader listener removed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Disable cleanup: panel removed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Disable cleanup: transport closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Re-enable restores plugin",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Reopen restores selected model",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Reopen restores selected effort",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Close button removes only the panel",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Crowded layout reserves reader space",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Reserved panel does not overlay reader",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Docked panel can be dragged to the left",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Undocking restores reader and preserves panel size",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Scrolling does not redock a manually moved panel",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Closing restores original reader margin",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Escape closes panel and preserves fullscreen",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Cmd-W closes only the panel",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Windowed mode also embeds without a native window",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "panel": {
+    "width": 460,
+    "height": 600
+  }
+}

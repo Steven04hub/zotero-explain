@@ -46,13 +46,13 @@ var ZEController = (() => {
     if (entry.manual) {
       restoreReader(entry);
       box = ZELayout.place(owner.innerWidth, owner.innerHeight, null, preferred, entry.manualSize);
-    } else if (!entry.dock) box = ZELayout.place(owner.innerWidth, owner.innerHeight, anchor, preferred);
+    } else if (!entry.dock) box = ZELayout.place(owner.innerWidth, owner.innerHeight, anchor, preferred, entry.userSize);
     // If selection geometry is unavailable, use reserved space instead of guessing.
     if (!entry.manual && (!box || (entry.source?.reader._iframe && !anchor)) && !entry.dock) {
       const browser = entry.source?.reader._iframe;
       if (browser?.isConnected) {
         const before = browser.getBoundingClientRect();
-        const width = Math.min(462, Math.max(250, before.width * 0.45));
+        const width = Math.min(entry.userSize?.width ?? 462, Math.max(250, before.width * 0.45));
         entry.dock = { browser, margin: browser.style.marginRight, width };
         const margin = parseFloat(owner.getComputedStyle(browser).marginRight) || 0;
         browser.style.marginRight = `${margin + width + 16}px`;
@@ -60,11 +60,11 @@ var ZEController = (() => {
     }
     if (entry.dock) {
       const reader = entry.dock.browser.getBoundingClientRect();
-      const height = Math.min(602, owner.innerHeight - Math.max(12, reader.top) - 12);
+      const height = Math.min(entry.userSize?.height ?? 602, owner.innerHeight - Math.max(12, reader.top) - 12);
       const top = Math.max(Math.max(12, reader.top), Math.min(preferred?.top ?? reader.top, owner.innerHeight - height - 12));
       box = { left: reader.right + 12, top, width: entry.dock.width, height };
     }
-    box ||= ZELayout.place(owner.innerWidth, owner.innerHeight, null, preferred);
+    box ||= ZELayout.place(owner.innerWidth, owner.innerHeight, null, preferred, entry.userSize);
     if (!box) return;
     Object.assign(host.style, { left: `${box.left}px`, top: `${box.top}px`, right: "auto",
       width: `${box.width}px`, height: `${box.height}px` });
@@ -75,6 +75,7 @@ var ZEController = (() => {
     entry.unwatch?.(); restoreReader(entry);
     entry.manual = false;
     entry.manualSize = null;
+    entry.drag = entry.resize = null;
     entry.source = source;
     const target = source?.sourceWindow;
     const changed = () => {
@@ -151,11 +152,30 @@ var ZEController = (() => {
         entry.preferred = desired; position(entry, desired);
       },
       endMove() { entry.drag = null; },
+      beginResize(edge, point) {
+        if (panel !== entry || !/^(n|s|e|w|ne|nw|se|sw)$/.test(edge)) return;
+        const box = host.getBoundingClientRect();
+        entry.resize = { edge, x: point.x, y: point.y,
+          left: box.left, top: box.top, width: box.width, height: box.height };
+      },
+      resize(point) {
+        if (panel !== entry || !entry.resize) return;
+        const start = entry.resize, dx = point.x - start.x, dy = point.y - start.y;
+        if (!dx && !dy && !start.changed) return;
+        start.changed = true;
+        const box = ZELayout.resize(owner.innerWidth, owner.innerHeight, start, start.edge, dx, dy);
+        if (!box) return;
+        entry.manual = true;
+        entry.userSize = entry.manualSize = { width: box.width, height: box.height };
+        entry.preferred = { left: box.left, top: box.top };
+        position(entry);
+      },
+      endResize() { entry.resize = null; },
       close: () => { if (panel === entry) close(); } };
     frame.addEventListener("load", () => {
       if (panel === entry) frame.contentWindow.focus();
     }, { once: true });
-    frame.src = "chrome://zotero-explain/content/panel.xhtml?v=0.3.4";
+    frame.src = "chrome://zotero-explain/content/panel.xhtml?v=0.3.5-final";
     host.appendChild(frame);
     panel = entry;
     owner.addEventListener("unload", entry.onUnload, { once: true });

@@ -182,6 +182,50 @@ test('repeated selection reuses the embedded panel, including selection before i
   assert.equal(frame.ZEBridge.selection.text, 'Latest sentence');
 });
 
+test('resized dimensions survive movement, scrolling and new selection avoidance', () => {
+  const e = setup(), win = e.main;
+  const source = { reader: {}, sourceWindow: win, key: 'first',
+    anchor: () => ({ left: 50, top: 180, right: 400, bottom: 440 }) };
+  e.controller.open({ text: 'First' }, win, source);
+  const frame = e.frame(win), bridge = frame.ZEBridge;
+  const before = frame.parent.getBoundingClientRect();
+  bridge.beginResize('w', { x: 1000, y: 200 });
+  bridge.resize({ x: 920, y: 200 });
+  assert.equal(frame.parent.getBoundingClientRect().width, before.width + 80);
+  bridge.resize({ x: 1000, y: 200 });
+  assert.equal(frame.parent.getBoundingClientRect().width, before.width);
+  bridge.resize({ x: 920, y: 200 }); bridge.endResize();
+  const sized = frame.parent.getBoundingClientRect();
+  assert.equal(sized.right, before.right);
+  bridge.beginMove({ x: 1000, y: 200 }); bridge.move({ x: 200, y: 200 }); bridge.endMove();
+  win.emit('scroll'); win.flushFrames();
+  assert.equal(frame.parent.getBoundingClientRect().width, sized.width);
+  e.controller.open({ text: 'Second' }, win, { ...source, key: 'second' });
+  const avoided = frame.parent.getBoundingClientRect();
+  assert.ok(avoided.left >= 412);
+  assert.equal(avoided.width, sized.width);
+  assert.equal(frame.contentWindow.ZEPanel.disposed, false);
+  bridge.close(); bridge.beginResize('e', { x: 0, y: 0 }); bridge.resize({ x: 100, y: 0 });
+  assert.equal(e.frame(win), undefined);
+});
+
+test('resizing a docked panel releases reserved reader space without snapping back', () => {
+  const e = setup(), win = e.main;
+  const browser = { isConnected: true, style: { marginRight: '9px' },
+    getBoundingClientRect() {
+      const right = 1390 - parseFloat(this.style.marginRight);
+      return { left: 20, right, top: 80, width: right - 20 };
+    } };
+  e.controller.open({ text: 'No geometry' }, win, { reader: { _iframe: browser }, sourceWindow: win, key: 'first', anchor: () => null });
+  const frame = e.frame(win), bridge = frame.ZEBridge;
+  const before = frame.parent.getBoundingClientRect();
+  bridge.beginResize('w', { x: 1000, y: 200 }); bridge.resize({ x: 940, y: 200 }); bridge.endResize();
+  assert.equal(browser.style.marginRight, '9px');
+  assert.equal(frame.parent.getBoundingClientRect().width, before.width + 60);
+  win.emit('scroll'); win.flushFrames();
+  assert.equal(frame.parent.getBoundingClientRect().width, before.width + 60);
+});
+
 test('changing reader owners disposes the old panel and ignores its late close callback', () => {
   const e = setup(); e.select(e.main); const old = e.frame(e.main);
   e.select(e.readerWindow);

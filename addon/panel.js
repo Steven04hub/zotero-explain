@@ -217,17 +217,19 @@ window.addEventListener("DOMContentLoaded", () => {
   };
   $("close").addEventListener("click", closePanel);
   const toolbar = document.querySelector(".toolbar");
-  let movingPointer = null;
+  let movingPointer = null, moveReportsButtons = false;
   toolbar.addEventListener("pointerdown", event => {
     if (event.button !== 0 || event.target.closest("button")) return;
     event.preventDefault();
     movingPointer = event.pointerId;
+    moveReportsButtons = !!(event.buttons & 1);
     bridge.beginMove({ x: event.screenX, y: event.screenY });
     try { toolbar.setPointerCapture(event.pointerId); } catch (_) {}
     toolbar.classList.add("dragging");
   });
   toolbar.addEventListener("pointermove", event => {
     if (event.pointerId !== movingPointer) return;
+    if (moveReportsButtons && !(event.buttons & 1)) { endMove(); return; }
     // Screen coordinates remain stable as the containing iframe moves.
     bridge.move({ x: event.screenX, y: event.screenY });
   });
@@ -241,6 +243,53 @@ window.addEventListener("DOMContentLoaded", () => {
   toolbar.addEventListener("pointercancel", endMove);
   toolbar.addEventListener("lostpointercapture", endMove);
   window.addEventListener("blur", endMove);
+  window.addEventListener("pointerup", endMove, true);
+  window.addEventListener("pointercancel", endMove, true);
+  const resizeLabels = { n: "上", s: "下", w: "左", e: "右", nw: "左上", ne: "右上", sw: "左下", se: "右下" };
+  for (const [edge, label] of Object.entries(resizeLabels)) {
+    const handle = document.createElement("div");
+    handle.className = "resize-handle resize-" + edge;
+    handle.dataset.edge = edge;
+    handle.tabIndex = 0;
+    handle.setAttribute("role", "button");
+    handle.setAttribute("aria-label", `调整${label}边缘大小，可拖动或使用方向键`);
+    handle.title = `拖动${label}边缘调整大小`;
+    let pointer = null, reportsButtons = false;
+    handle.addEventListener("pointerdown", event => {
+      if (event.button !== 0 || pointer !== null) return;
+      event.preventDefault(); event.stopPropagation(); closeMenus();
+      pointer = event.pointerId;
+      reportsButtons = !!(event.buttons & 1);
+      bridge.beginResize(edge, { x: event.screenX, y: event.screenY });
+      try { handle.setPointerCapture(pointer); } catch (_) {}
+    });
+    handle.addEventListener("pointermove", event => {
+      if (event.pointerId !== pointer) return;
+      // Gecko can lose capture when the containing iframe moves. A hover must
+      // never continue a resize after the physical mouse button is released.
+      // Some synthesized native events omit buttons even on pointerdown;
+      // those rely on the window-level release/cancel handlers instead.
+      if (reportsButtons && !(event.buttons & 1)) { endResize(); return; }
+      bridge.resize({ x: event.screenX, y: event.screenY });
+    });
+    const endResize = () => {
+      if (pointer === null) return;
+      const id = pointer; pointer = null;
+      bridge.endResize();
+      if (handle.hasPointerCapture(id)) handle.releasePointerCapture(id);
+    };
+    for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) handle.addEventListener(type, endResize);
+    window.addEventListener("blur", endResize);
+    window.addEventListener("pointerup", endResize, true);
+    window.addEventListener("pointercancel", endResize, true);
+    handle.addEventListener("keydown", event => {
+      const delta = { ArrowLeft: [-20, 0], ArrowRight: [20, 0], ArrowUp: [0, -20], ArrowDown: [0, 20] }[event.key];
+      if (!delta) return;
+      event.preventDefault(); event.stopPropagation();
+      bridge.beginResize(edge, { x: 0, y: 0 }); bridge.resize({ x: delta[0], y: delta[1] }); bridge.endResize();
+    });
+    document.body.appendChild(handle);
+  }
   toolbar.addEventListener("keydown", event => {
     if (event.target !== toolbar) return;
     const delta = { ArrowLeft: [-20, 0], ArrowRight: [20, 0], ArrowUp: [0, -20], ArrowDown: [0, 20] }[event.key];
@@ -281,6 +330,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
   window.addEventListener("blur", closeMenus);
+  window.addEventListener("resize", closeMenus);
   document.querySelector("main").addEventListener("scroll", closeMenus);
   renderPickers();
   $("codexPath").value = platform.getPath();

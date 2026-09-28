@@ -35,6 +35,19 @@ var ZELayout = (() => {
     candidates.sort((a, b) => score(a) - score(b));
     return candidates[0] || null;
   }
+  function resize(width, height, start, edge, dx, dy) {
+    const base = place(width, height, null, start, start);
+    if (!base) return null;
+    let { left, top } = base;
+    let right = left + base.width, bottom = top + base.height;
+    // The opposite edge stays anchored. Small owner windows take precedence
+    // over the normal minimum size, so every handle remains reachable.
+    if (edge.includes("w")) left = clamp(left + dx, 12, right - Math.min(322, right - 12));
+    if (edge.includes("e")) right = clamp(right + dx, left + Math.min(322, width - 12 - left), width - 12);
+    if (edge.includes("n")) top = clamp(top + dy, 12, bottom - Math.min(262, bottom - 12));
+    if (edge.includes("s")) bottom = clamp(bottom + dy, top + Math.min(262, height - 12 - top), height - 12);
+    return { left, top, width: right - left, height: bottom - top };
+  }
   function toOwner(value, source, owner, readerFrame = null) {
     let result = rect(value);
     for (let depth = 0; result && source && depth < 8; depth++) {
@@ -57,5 +70,5 @@ var ZELayout = (() => {
     }
     return null;
   }
-  return { rect, intersect, place, toOwner };
+  return { rect, intersect, place, resize, toOwner };
 })();

@@ -14,7 +14,14 @@ The plugin uses the **official Codex App Server** and your account's **Codex acc
 - Choose a model and reasoning effort. Effort options come from the selected model's capabilities.
 - Automatically remember both choices across panel closures, plugin reloads, and Zotero restarts.
 - Start with **GPT-6 Sol / medium** when no preferences have been saved.
-- Use a compact panel embedded in the current reader window, with a maximum content size of 460 × 600, light and dark appearances, no minimization, and no opening animation. It stays with the paper in macOS fullscreen mode and shrinks to fit smaller windows.
+- Use a compact panel embedded in the current reader window, with a default content size of 460 × 600, light and dark appearances, no minimization, and no opening animation. It stays with the paper in macOS fullscreen mode and shrinks to fit smaller windows.
+
+## 0.3.5: Resize from every edge
+
+- Drag any of the four edges to expand or shrink the panel; corners resize both dimensions. The lower-right corner has a visible resize hint.
+- The opposite edge stays fixed. The normal minimum is 322 × 262, with size constrained by the Zotero window; smaller windows override that minimum to keep handles reachable.
+- While the panel remains open, movement, scrolling, and new selections retain the requested size. Selection avoidance can temporarily shrink it when space is limited. Closing and reopening restores the default size.
+- Short panels scroll their content; controls wrap in narrow panels. Focus a resize handle and use arrow keys for keyboard resizing.
 
 ## 0.3.4: Free dragging
 
@@ -47,7 +54,7 @@ Windows discovery is covered by simulated tests; Windows and Linux have not been
 
 ## Install and use
 
-1. Download [`zotero-explain-0.3.4.xpi`](dist/zotero-explain-0.3.4.xpi), or build it from source. Checksums are provided in [`dist/SHA256SUMS`](dist/SHA256SUMS).
+1. Download [`zotero-explain-0.3.5.xpi`](dist/zotero-explain-0.3.5.xpi), or build it from source. Checksums are provided in [`dist/SHA256SUMS`](dist/SHA256SUMS).
 2. In Zotero, open **Tools → Plugins**. Drag the XPI into the window, or use the gear menu's **Install Plugin From File…** option.
 3. Open **Tools → 论文解释 · ChatGPT**, then click **登录 ChatGPT** (“Sign in to ChatGPT”). Complete sign-in on the official OpenAI page in your browser and return to Zotero.
 4. Open a PDF, select a sentence or passage, and click **✦ 用 ChatGPT 解释** in the selection popup.
@@ -126,6 +133,8 @@ The test instance exits after writing `.dev/native-result.json`. Run the same Zo
 `node scripts/probe-codex.cjs` checks real App Server initialization, signed-out account state, official login URL generation, and login cancellation. It uses an isolated configuration, does not open a browser, and does not submit model requests.
 
 ### Verification
+
+For **0.3.5**, 54 automated tests, 98 macOS native checks, and 7 separate-process restart checks passed. Installed and verified consecutive top/right edge drags in the actual Zotero window. Reports: [native](docs/native-verification-0.3.5.json) / [restart](docs/restart-verification-0.3.5.json).
 
 For **0.3.4**, 50 automated tests, 65 macOS native checks, and 7 separate-process restart checks passed. Updated the installed plugin and verified dragging across a real PDF selection from right to left without snapping back. Reports: [native](docs/native-verification-0.3.4.json) / [restart](docs/restart-verification-0.3.4.json).
 

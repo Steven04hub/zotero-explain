@@ -115,8 +115,8 @@ async function startup() {
       record('Geometry: left selection stays visible', host.getBoundingClientRect().left >= selectionBox[2] + 12);
       const titlebar = doc.querySelector('.toolbar');
       const beforeDrag = host.getBoundingClientRect();
-      titlebar.dispatchEvent(new panel.PointerEvent('pointerdown', { button: 0, pointerId: 11, screenX: 1000, screenY: 200, bubbles: true }));
-      titlebar.dispatchEvent(new panel.PointerEvent('pointermove', { pointerId: 11, screenX: 950, screenY: 250, bubbles: true }));
+      titlebar.dispatchEvent(new panel.PointerEvent('pointerdown', { button: 0, buttons: 1, pointerId: 11, screenX: 1000, screenY: 200, bubbles: true }));
+      titlebar.dispatchEvent(new panel.PointerEvent('pointermove', { buttons: 1, pointerId: 11, screenX: 950, screenY: 250, bubbles: true }));
       titlebar.dispatchEvent(new panel.PointerEvent('pointerup', { pointerId: 11, bubbles: true }));
       const afterDrag = host.getBoundingClientRect();
       record('Native titlebar drag moves panel', afterDrag.left !== beforeDrag.left || afterDrag.top !== beforeDrag.top);
@@ -124,8 +124,8 @@ async function startup() {
       titlebar.dispatchEvent(new panel.KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
       record('Keyboard can move titlebar', host.getBoundingClientRect().top > afterDrag.top);
       const beforeCrossing = host.getBoundingClientRect();
-      titlebar.dispatchEvent(new panel.PointerEvent('pointerdown', { button: 0, pointerId: 12, screenX: 1000, screenY: 200, bubbles: true }));
-      titlebar.dispatchEvent(new panel.PointerEvent('pointermove', { pointerId: 12, screenX: 1000 + 30 - beforeCrossing.left, screenY: 200, bubbles: true }));
+      titlebar.dispatchEvent(new panel.PointerEvent('pointerdown', { button: 0, buttons: 1, pointerId: 12, screenX: 1000, screenY: 200, bubbles: true }));
+      titlebar.dispatchEvent(new panel.PointerEvent('pointermove', { buttons: 1, pointerId: 12, screenX: 1000 + 30 - beforeCrossing.left, screenY: 200, bubbles: true }));
       titlebar.dispatchEvent(new panel.PointerEvent('pointerup', { pointerId: 12, bubbles: true }));
       record('Manual drag can cross selected text to the left', Math.abs(host.getBoundingClientRect().left - 30) <= 1);
       win.dispatchEvent(new win.Event('scroll')); win.dispatchEvent(new win.Event('resize'));
@@ -133,6 +133,54 @@ async function startup() {
       record('Scroll and resize preserve manual placement', Math.abs(host.getBoundingClientRect().left - 30) <= 1);
       chooseGeometry('New left selection'); await Zotero.Promise.delay(50);
       record('New selection resumes automatic avoidance', host.getBoundingClientRect().left >= selectionBox[2] + 12);
+      const resizePanel = (edge, dx, dy, finish = 'pointerup') => {
+        const handle = doc.querySelector('.resize-' + edge);
+        handle.dispatchEvent(new panel.PointerEvent('pointerdown', { button: 0, buttons: 1, pointerId: 20, screenX: 1000, screenY: 300, bubbles: true }));
+        handle.dispatchEvent(new panel.PointerEvent('pointermove', { buttons: 1, pointerId: 20, screenX: 1000 + dx, screenY: 300 + dy, bubbles: true }));
+        handle.dispatchEvent(new panel.PointerEvent(finish, { pointerId: 20, bubbles: true }));
+      };
+      const sameBox = (a, b) => ['left', 'top', 'width', 'height'].every(k => Math.abs(a[k] - b[k]) <= 1);
+      record('Eight resize handles available', doc.querySelectorAll('.resize-handle').length === 8);
+      for (const edge of ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw']) {
+        const before = host.getBoundingClientRect();
+        const dx = edge.includes('w') ? 40 : edge.includes('e') ? -40 : 0;
+        const dy = edge.includes('n') ? 30 : edge.includes('s') ? -30 : 0;
+        const handle = doc.querySelector('.resize-' + edge), hit = handle.getBoundingClientRect();
+        record('Resize hit target: ' + edge, doc.elementFromPoint(hit.left + hit.width / 2, hit.top + hit.height / 2) === handle);
+        resizePanel(edge, dx, dy); await Zotero.Promise.delay(30);
+        const after = host.getBoundingClientRect();
+        record('Resize inward: ' + edge, sameBox(after, { left: before.left + (edge.includes('w') ? dx : 0), top: before.top + (edge.includes('n') ? dy : 0), width: before.width - Math.abs(dx), height: before.height - Math.abs(dy) }));
+        resizePanel(edge, -dx, -dy); await Zotero.Promise.delay(30);
+        record('Resize outward: ' + edge, sameBox(host.getBoundingClientRect(), before));
+      }
+      const originalSize = host.getBoundingClientRect();
+      resizePanel('se', -5000, -5000); await Zotero.Promise.delay(100);
+      record('Minimum panel size', host.getBoundingClientRect().width === 322 && host.getBoundingClientRect().height === 262);
+      record('Narrow panel has no horizontal overflow', doc.querySelector('main').scrollWidth <= doc.querySelector('main').clientWidth + 1);
+      record('Short panel content remains scrollable', doc.querySelector('main').scrollHeight > doc.querySelector('main').clientHeight);
+      resizePanel('se', originalSize.width - 322, originalSize.height - 262);
+      resizePanel('w', 20, 0, 'pointercancel');
+      const cancelledSize = host.getBoundingClientRect();
+      doc.querySelector('.resize-w').dispatchEvent(new panel.PointerEvent('pointermove', { buttons: 1, pointerId: 20, screenX: 900, screenY: 300, bubbles: true }));
+      record('Cancelled resize stops tracking', sameBox(host.getBoundingClientRect(), cancelledSize));
+      chooseGeometry('Resized panel selection'); await Zotero.Promise.delay(50);
+      record('New selection preserves requested size', host.getBoundingClientRect().width === cancelledSize.width);
+      resizePanel('w', -20, 0);
+      resizePanel('n', 0, 20, 'test-no-release');
+      const releasedSize = host.getBoundingClientRect();
+      doc.querySelector('.resize-n').dispatchEvent(new panel.PointerEvent('pointermove', { buttons: 0, pointerId: 20, screenX: 1000, screenY: 600, bubbles: true }));
+      record('Hover after a missed pointer release stops resizing', sameBox(host.getBoundingClientRect(), releasedSize));
+      resizePanel('n', 0, -20);
+      const syntheticHandle = doc.querySelector('.resize-e');
+      syntheticHandle.dispatchEvent(new panel.PointerEvent('pointerdown', { button: 0, buttons: 0, pointerId: 21, screenX: 1000, screenY: 300, bubbles: true }));
+      const beforeSynthetic = host.getBoundingClientRect();
+      syntheticHandle.dispatchEvent(new panel.PointerEvent('pointermove', { buttons: 0, pointerId: 21, screenX: 980, screenY: 300, bubbles: true }));
+      const afterSynthetic = host.getBoundingClientRect();
+      panel.dispatchEvent(new panel.PointerEvent('pointerup', { pointerId: 21 }));
+      syntheticHandle.dispatchEvent(new panel.PointerEvent('pointermove', { buttons: 0, pointerId: 21, screenX: 900, screenY: 300, bubbles: true }));
+      record('Synthetic native drag resizes and release outside handle stops it', afterSynthetic.width === beforeSynthetic.width - 20 && sameBox(host.getBoundingClientRect(), afterSynthetic));
+      resizePanel('e', 20, 0);
+      record('Resize keeps reader fullscreen', win.fullScreen);
       // A separately labelled fake backend checks the real native UI without an account.
       const bridge = panel.frameElement.ZEBridge;
       const realStart = bridge.platform.start;

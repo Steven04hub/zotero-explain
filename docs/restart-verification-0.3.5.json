@@ -1,0 +1,41 @@
+{
+  "version": "10.0.4",
+  "checks": [
+    {
+      "name": "Tools menu",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Embedded panel",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Reader remains fullscreen",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Opening explanation creates no native window",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Restart restores selected model",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Restart restores selected effort",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Restart displays restored effort",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "phase": "after-process-restart"
+}

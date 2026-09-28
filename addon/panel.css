@@ -8,6 +8,18 @@ body { margin: 0; background: var(--bg); color: var(--ink); font: 13px/1.5 -appl
 .toolbar:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }
 .drag-hint { color: var(--muted); margin-left: auto; font-size: 16px; }
 .toolbar .icon-button { margin-left: 3px; }
+.resize-handle { position: fixed; z-index: 20; touch-action: none; user-select: none; }
+.resize-handle:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; background: var(--soft); }
+.resize-n, .resize-s { left: 14px; right: 14px; height: 6px; cursor: ns-resize; }
+.resize-n { top: 0; } .resize-s { bottom: 0; }
+.resize-w, .resize-e { top: 14px; bottom: 14px; width: 6px; cursor: ew-resize; }
+.resize-w { left: 0; } .resize-e { right: 0; }
+.resize-nw, .resize-ne, .resize-sw, .resize-se { width: 14px; height: 14px; }
+.resize-nw { top: 0; left: 0; cursor: nwse-resize; }
+.resize-ne { top: 0; right: 0; cursor: nesw-resize; }
+.resize-sw { bottom: 0; left: 0; cursor: nesw-resize; }
+.resize-se { bottom: 0; right: 0; cursor: nwse-resize; }
+.resize-se::after { content: ""; position: absolute; right: 4px; bottom: 4px; width: 6px; height: 6px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); opacity: .5; }
 h1 { font-size: 14px; font-weight: 600; letter-spacing: -.2px; margin: 0; }
 .service { color: var(--muted); font-size: 11px; }
 main { height: calc(100% - 44px); padding: 8px 16px 10px; display: flex; flex-direction: column; gap: 9px; overflow: auto; }
@@ -36,7 +48,7 @@ textarea { width: 100%; resize: none; line-height: 1.55; display: block; }
 .context-details { margin-top: 5px; }
 summary { color: var(--muted); cursor: pointer; font-size: 11px; }
 details textarea { margin-top: 7px; }
-.controls { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
+.controls { display: flex; align-items: center; gap: 7px; flex-shrink: 0; flex-wrap: wrap; }
 .model-toggle { display: flex; gap: 8px; align-items: center; min-width: 0; max-width: 215px; border-radius: 16px; font-size: 12px; background: linear-gradient(#ffffffee, #ffffff88); box-shadow: 0 1px 2px #00000006; }
 #modelLabel { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .chevron { flex-shrink: 0; color: var(--muted); }

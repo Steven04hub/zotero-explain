@@ -7,6 +7,32 @@ vm.runInContext(fs.readFileSync('addon/layout.js', 'utf8'), context);
 const layout = context.ZELayout;
 const boxOf = p => layout.rect([p.left, p.top, p.left + p.width, p.top + p.height]);
 
+test('all four edges and corners resize in both directions with opposite edges fixed', () => {
+  const start = { left: 400, top: 200, width: 462, height: 402 };
+  for (const edge of ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw']) {
+    for (const amount of [-60, 60]) {
+      const p = layout.resize(1400, 900, start, edge, amount, amount);
+      assert.equal(p.left, start.left + (edge.includes('w') ? amount : 0));
+      assert.equal(p.top, start.top + (edge.includes('n') ? amount : 0));
+      assert.equal(p.left + p.width, start.left + start.width + (edge.includes('e') ? amount : 0));
+      assert.equal(p.top + p.height, start.top + start.height + (edge.includes('s') ? amount : 0));
+    }
+  }
+});
+
+test('resizing clamps extreme drags to minimum size and owner bounds', () => {
+  for (const [width, height] of [[1400, 900], [300, 220]]) {
+    const start = layout.place(width, height, null);
+    for (const edge of ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw']) {
+      for (const amount of [-5000, 5000]) {
+        const p = layout.resize(width, height, start, edge, amount, amount);
+        assert.ok(p.width >= Math.min(322, width - 24) && p.height >= Math.min(262, height - 24));
+        assert.ok(p.left >= 12 && p.top >= 12 && p.left + p.width <= width - 12 && p.top + p.height <= height - 12);
+      }
+    }
+  }
+});
+
 test('right-column selection leaves a full-size panel on the left', () => {
   const anchor = layout.rect([820, 170, 1200, 400]);
   const p = layout.place(1400, 900, anchor);
