@@ -179,7 +179,7 @@ var ZEPlatform = (() => {
       }).catch(() => client.close());
       try {
         await client.request("initialize", { clientInfo: {
-          name: "zotero_explain", title: "Zotero Paper Explain", version: "0.3.1",
+          name: "zotero_explain", title: "Zotero Paper Explain", version: "0.3.2",
         }, capabilities: {} });
         await client.notify("initialized");
         return client;

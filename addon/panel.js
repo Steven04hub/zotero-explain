@@ -1,7 +1,7 @@
 "use strict";
 var ZEPanel;
 window.addEventListener("DOMContentLoaded", () => {
-  const { core, platform, selection } = window.arguments[0];
+  const { core, platform, selection, close: closePanel } = window.frameElement.ZEBridge;
   const $ = id => document.getElementById(id);
   let rpc = null, off = null, account = null, loginID = null;
   let conversation = null, busy = false, connecting = false, epoch = 0, title = "", lastAnswer = "";
@@ -194,7 +194,13 @@ window.addEventListener("DOMContentLoaded", () => {
       if (ownEpoch === epoch) { showError(error); $("status").textContent = "本次生成已结束"; }
     } finally { if (ownEpoch === epoch) { busy = false; update(); } }
   }
+  function dispose() {
+    if (disposed) return;
+    disposed = true; ++epoch; ++accountRevision; off?.(); conversation?.dispose().catch(() => {});
+    if (loginID && rpc) rpc.request("account/login/cancel", { loginId: loginID }).catch(() => {});
+  }
   ZEPanel = {
+    dispose,
     async select(value) {
       ++epoch; busy = false;
       const old = conversation; conversation = null;
@@ -208,7 +214,7 @@ window.addEventListener("DOMContentLoaded", () => {
       clearError(); update(); await old?.dispose();
     },
   };
-  $("close").addEventListener("click", () => window.close());
+  $("close").addEventListener("click", closePanel);
   for (const kind of ["model", "effort"]) {
     $(kind + "Toggle").addEventListener("click", () => $(kind + "Menu").hidden ? openMenu(kind) : closeMenu(kind, true));
     $(kind + "Toggle").addEventListener("keydown", event => {
@@ -233,11 +239,13 @@ window.addEventListener("DOMContentLoaded", () => {
   });
   document.addEventListener("keydown", event => {
     if (event.key === "Escape") {
-      event.preventDefault();
+      event.preventDefault(); event.stopPropagation();
       const open = ["model", "effort"].find(kind => !$(kind + "Menu").hidden);
-      if (open) closeMenu(open, true); else window.close();
+      if (open) closeMenu(open, true); else closePanel();
     }
-    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "w") { event.preventDefault(); window.close(); }
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "w") {
+      event.preventDefault(); event.stopPropagation(); closePanel();
+    }
   });
   window.addEventListener("blur", closeMenus);
   document.querySelector("main").addEventListener("scroll", closeMenus);
@@ -302,10 +310,7 @@ window.addEventListener("DOMContentLoaded", () => {
   $("copy").addEventListener("click", () => {
     try { platform.copy(lastAnswer); $("status").textContent = "回答已复制"; } catch (error) { showError(error); }
   });
-  window.addEventListener("unload", () => {
-    disposed = true; ++epoch; ++accountRevision; off?.(); conversation?.dispose().catch(() => {});
-    if (loginID && rpc) rpc.request("account/login/cancel", { loginId: loginID }).catch(() => {});
-  }, { once: true });
+  window.addEventListener("unload", dispose, { once: true });
   if (selection) ZEPanel.select(selection);
   connect();
 }, { once: true });

@@ -44,18 +44,23 @@ async function startup() {
     }
     try {
       const win = Zotero.getMainWindow();
-      const menu = win.document.getElementById('zotero-explain-menu');
+      let menu = win.document.getElementById('zotero-explain-menu');
       record('Tools menu', menu);
       if (!menu) throw new Error('Plugin did not initialize');
+      const countWindows = () => {
+        const windows = Services.wm.getEnumerator(null); let count = 0;
+        while (windows.hasMoreElements()) { windows.getNext(); count++; }
+        return count;
+      };
+      const windowsBefore = countWindows();
+      win.fullScreen = true;
+      await Zotero.Promise.delay(1200);
       menu.doCommand();
       await Zotero.Promise.delay(3500);
-      const windows = Services.wm.getEnumerator(null);
-      let panel;
-      while (windows.hasMoreElements()) {
-        const w = windows.getNext();
-        if (w.location.href.includes('zotero-explain/content/panel.xhtml')) panel = w;
-      }
-      record('Native panel', panel);
+      let panel = win.document.getElementById('zotero-explain-frame')?.contentWindow;
+      record('Embedded panel', panel);
+      record('Reader remains fullscreen', win.fullScreen);
+      record('Opening explanation creates no native window', countWindows() === windowsBefore);
       if (!panel) throw new Error('Panel did not open');
       const doc = panel.document;
       if (restarting) {
@@ -77,7 +82,7 @@ async function startup() {
       const listener = Zotero.Reader._registeredListeners.find(x => x.pluginID === 'zotero-explain@local' && x.type === 'renderTextSelectionPopup');
       record('Reader listener', listener);
       let button;
-      listener.handler({ reader: { itemID: item.id }, doc: win.document,
+      listener.handler({ reader: { itemID: item.id, _window: win }, doc: win.document,
         params: { annotation: { text: 'Contrastive learning pulls positive pairs together and pushes negative pairs apart.', pageLabel: '1' } }, append: value => { button = value; } });
       record('Selection action', button?.textContent.includes('ChatGPT'));
       button.click(); await Zotero.Promise.delay(200);
@@ -86,15 +91,15 @@ async function startup() {
       record('Generation disabled until login', doc.getElementById('explain').disabled);
       result.panel = { width: panel.innerWidth, height: panel.innerHeight };
       record('Compact panel fits screen', panel.innerWidth === 460 && panel.innerHeight === 600);
-      const flags = panel.docShell.treeOwner.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIAppWindow).chromeFlags;
-      record('Window cannot minimize', !(flags & Ci.nsIWebBrowserChrome.CHROME_WINDOW_MINIMIZE));
-      record('Window animations suppressed', flags & Ci.nsIWebBrowserChrome.CHROME_SUPPRESS_ANIMATION);
+      const host = win.document.getElementById('zotero-explain-panel');
+      record('Panel lives inside reader window', panel.frameElement.ownerDocument === win.document);
+      record('Panel has no opening animation', win.getComputedStyle(host).animationName === 'none');
       record('Default model is GPT-6 Sol', doc.getElementById('model').value === 'gpt-6-sol');
       record('Default layout fits without horizontal scroll', doc.documentElement.scrollWidth === panel.innerWidth);
       record('Current compact stylesheet loaded', panel.getComputedStyle(doc.querySelector('.toolbar')).height === '44px');
       record('Default layout needs no outer scrolling', doc.querySelector('main').scrollHeight <= doc.querySelector('main').clientHeight + 1);
       // A separately labelled fake backend checks the real native UI without an account.
-      const bridge = panel.arguments[0];
+      const bridge = panel.frameElement.ZEBridge;
       const realStart = bridge.platform.start;
       const mockCalls = [];
       let mockAccount = true, turnNumber = 0, threadDelay = 0;
@@ -178,20 +183,29 @@ async function startup() {
       await addon.disable(); await Zotero.Promise.delay(500);
       record('Disable cleanup: menu removed', !win.document.getElementById('zotero-explain-menu'));
       record('Disable cleanup: reader listener removed', !Zotero.Reader._registeredListeners.some(x => x.pluginID === 'zotero-explain@local'));
-      record('Disable cleanup: window closed', panel.closed);
+      record('Disable cleanup: panel removed', !win.document.getElementById('zotero-explain-panel'));
       record('Disable cleanup: transport closed', realRPC.closed);
       await addon.enable(); await Zotero.Promise.delay(300);
       record('Re-enable restores plugin', win.document.getElementById('zotero-explain-menu'));
       win.document.getElementById('zotero-explain-menu').doCommand();
       await Zotero.Promise.delay(800);
-      let reopened;
-      const reopenedWindows = Services.wm.getEnumerator(null);
-      while (reopenedWindows.hasMoreElements()) {
-        const w = reopenedWindows.getNext();
-        if (w.location.href.includes('zotero-explain/content/panel.xhtml')) reopened = w;
-      }
+      let reopened = win.document.getElementById('zotero-explain-frame')?.contentWindow;
       record('Reopen restores selected model', reopened?.document.getElementById('model').value === 'test-model');
       record('Reopen restores selected effort', reopened?.document.getElementById('effort').value === 'high');
+      reopened.document.getElementById('close').click();
+      record('Close button removes only the panel', !win.document.getElementById('zotero-explain-panel') && !win.closed && win.fullScreen);
+      menu = win.document.getElementById('zotero-explain-menu');
+      menu.doCommand(); await Zotero.Promise.delay(500);
+      reopened = win.document.getElementById('zotero-explain-frame')?.contentWindow;
+      reopened.document.dispatchEvent(new reopened.KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+      record('Escape closes panel and preserves fullscreen', !win.document.getElementById('zotero-explain-panel') && win.fullScreen);
+      menu.doCommand(); await Zotero.Promise.delay(500);
+      reopened = win.document.getElementById('zotero-explain-frame')?.contentWindow;
+      reopened.document.dispatchEvent(new reopened.KeyboardEvent('keydown', { key: 'w', metaKey: true, bubbles: true, cancelable: true }));
+      record('Cmd-W closes only the panel', !win.document.getElementById('zotero-explain-panel') && !win.closed && win.fullScreen);
+      win.fullScreen = false; await Zotero.Promise.delay(1200);
+      menu.doCommand(); await Zotero.Promise.delay(500);
+      record('Windowed mode also embeds without a native window', !!win.document.getElementById('zotero-explain-frame') && !win.fullScreen && countWindows() === windowsBefore);
       Services.prefs.setBoolPref(restartFlag, true); Services.prefs.savePrefFile(null);
     } catch (error) { result.error = error.message + '\n' + error.stack; }
     await IOUtils.writeUTF8(RESULT_PATH, JSON.stringify(result, null, 2));

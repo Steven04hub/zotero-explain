@@ -1,6 +1,6 @@
 {
   "name": "zotero-explain",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "private": true,
   "description": "Explain selected paper passages in Zotero with ChatGPT account sign-in via Codex App Server",
   "scripts": {

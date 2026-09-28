@@ -14,7 +14,7 @@ The plugin uses the **official Codex App Server** and your account's **Codex acc
 - Choose a model and reasoning effort. Effort options come from the selected model's capabilities.
 - Automatically remember both choices across panel closures, plugin reloads, and Zotero restarts.
 - Start with **GPT-6 Sol / medium** when no preferences have been saved.
-- Use a compact 460 × 600 panel with light and dark appearances, no minimization, and suppressed window animations.
+- Use a compact panel embedded in the current reader window, with a maximum content size of 460 × 600, light and dark appearances, no minimization, and no opening animation. It stays with the paper in macOS fullscreen mode and shrinks to fit smaller windows.
 
 ## Requirements
 
@@ -34,12 +34,12 @@ Windows discovery is covered by simulated tests; Windows and Linux have not been
 
 ## Install and use
 
-1. Download [`zotero-explain-0.3.1.xpi`](dist/zotero-explain-0.3.1.xpi), or build it from source. Checksums are provided in [`dist/SHA256SUMS`](dist/SHA256SUMS).
+1. Download [`zotero-explain-0.3.2.xpi`](dist/zotero-explain-0.3.2.xpi), or build it from source. Checksums are provided in [`dist/SHA256SUMS`](dist/SHA256SUMS).
 2. In Zotero, open **Tools → Plugins**. Drag the XPI into the window, or use the gear menu's **Install Plugin From File…** option.
 3. Open **Tools → 论文解释 · ChatGPT**, then click **登录 ChatGPT** (“Sign in to ChatGPT”). Complete sign-in on the official OpenAI page in your browser and return to Zotero.
 4. Open a PDF, select a sentence or passage, and click **✦ 用 ChatGPT 解释** in the selection popup.
 5. Check the source text, optionally expand **补充上下文** (“Additional context”), choose a model and effort, and click **解释** (“Explain”).
-6. Use the follow-up field to continue the conversation, or close the panel with its close button, Escape, or ⌘W.
+6. Use the follow-up field to continue the conversation, or close only the panel with its close button, Escape, or ⌘W / Ctrl+W while focused in the panel. The reader remains open and keeps its fullscreen state.
 
 Selecting text does not send a model request. The plugin sends the selected passage, paper title, and any context you add only when you click Explain. It does not automatically upload the entire paper. Scanned PDFs need a selectable text layer.
 
@@ -112,6 +112,8 @@ The test instance exits after writing `.dev/native-result.json`. Run the same Zo
 `node scripts/probe-codex.cjs` checks real App Server initialization, signed-out account state, official login URL generation, and login cancellation. It uses an isolated configuration, does not open a browser, and does not submit model requests.
 
 ### Verification
+
+For **0.3.2**, 36 automated tests, 51 native checks on macOS, and 7 separate-process startup/persistence checks passed. Fullscreen checks verify that opening the embedded panel creates no native window, closing it preserves fullscreen, and shortcuts close only the panel. Controller tests also cover detached reader ownership and cleanup. Reports: [native](docs/native-verification-0.3.2.json) / [restart](docs/restart-verification-0.3.2.json).
 
 For **0.3.1**, 31 automated tests (including 10 new Windows discovery/error-handling simulations), 45 native checks on macOS, and 5 separate-process persistence checks passed. Windows Store permissions, PowerShell execution, sign-in, and generation still require testing on a real Windows machine. Reports: [native](docs/native-verification-0.3.1.json) / [restart](docs/restart-verification-0.3.1.json).
 
