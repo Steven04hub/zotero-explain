@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "论文解释 · ChatGPT",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "选中论文句子，用 ChatGPT 账号登录后解释与追问，无需 API Key（使用 Codex 额度）。",
   "applications": {
     "zotero": {

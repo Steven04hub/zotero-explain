@@ -8,13 +8,21 @@
 
 ## 安装和使用
 
-1. 下载 [zotero-explain-0.3.0.xpi](dist/zotero-explain-0.3.0.xpi)，或自行构建。校验和见 [SHA256SUMS](dist/SHA256SUMS)。
+1. 下载 [zotero-explain-0.3.1.xpi](dist/zotero-explain-0.3.1.xpi)，或自行构建。校验和见 [SHA256SUMS](dist/SHA256SUMS)。
 2. 在 Zotero 中打开 **工具 → 插件**，将 XPI 拖入窗口，或使用齿轮菜单的“从文件安装插件”。
 3. 打开 **工具 → 论文解释 · ChatGPT**，点击“登录 ChatGPT”。在系统浏览器的 OpenAI 官方页面完成登录，再返回 Zotero。
 4. 打开论文 PDF，选中一句或一段文字，在选区弹出框中点击 **✦ 用 ChatGPT 解释**。
 5. 在解释窗口确认原文，按需补充前后段落，点击“解释”。首次使用默认为 **GPT-6 Sol，思考度中等**；可打开模型和思考度菜单选择，之后会记住最近一次选择。支持停止生成、继续追问或复制回答。
 
 插件不会自动发送整篇论文。选中文字但没有点击“解释”时，不会提交模型请求。扫描版 PDF 需要先具有可选择的文字层。
+
+## 0.3.1 Windows 程序查找修复
+
+- Windows 商店版：通过系统 PowerShell 的 `Get-AppxPackage` 查询当前用户安装的 `OpenAI.Codex` / `OpenAI.ChatGPT`，定位应用内的原生 CLI。每次连接重新查询，可适应商店更新后的版本目录及其他磁盘的安装位置。
+- 同时检查用户目录下常见的独立 CLI 路径。查询失败或超时会继续查找，不修改 WindowsApps 权限、不请求管理员权限。
+- 手动路径支持资源管理器“复制文件地址”带的双引号和 `%LOCALAPPDATA%` 等环境变量。无法访问文件、路径失效与进程启动失败会显示对应提示。
+- 升级后若仍保留以前手动填写的错误路径，在“账号与设置”中**清空 Codex 路径并保存**，即可恢复自动查找。
+- Windows 分支已通过模拟测试，仍需 Windows 实机验证登录与解释；不代表所有商店权限策略均可启动内置 CLI。
 
 ## 0.3.0 思考度与偏好记忆
 
@@ -40,9 +48,11 @@
 
 macOS 会优先查找已安装的 ChatGPT / Codex 桌面应用中的原生 Codex 程序，再查找常见命令路径。这台开发机器已安装相应程序。
 
-若提示未找到程序：安装官方 [Codex CLI](https://developers.openai.com/codex/cli)，或在插件的“账号与设置”中指定原生 `codex` / `codex.exe` 的绝对路径。Windows 不要填写 `codex.cmd`；应选择官方发行包里的 `codex.exe`。npm 安装的入口脚本依赖 Node 出现在 Zotero 的进程 PATH 中，优先填写原生程序路径。
+Windows 会查询 Microsoft Store 注册的安装目录，并查找其中的 `app\resources\codex.exe` 等内置 CLI 位置；不会使用桌面 GUI 的 `app\Codex.exe`。也会查找 `%LOCALAPPDATA%\Programs\OpenAI\Codex\bin\codex.exe`、`%LOCALAPPDATA%\OpenAI\Codex\bin\codex.exe`、用户 `.local\bin` 和 PATH。
 
-目前针对 **macOS + Zotero 10.0.4** 开发。Windows / Linux 的自动发现及原生运行尚未实机验证。插件不内置或下载 Codex 二进制，其他机器仍需自行安装官方运行程序。Codex App Server 仍在演进，旧版本可能不支持部分接口。
+若提示未找到程序：安装官方 [Codex CLI](https://developers.openai.com/codex/cli)，或在插件的“账号与设置”中指定原生 `codex` / `codex.exe` 的绝对路径。Windows 不要填写 `codex.cmd`、快捷方式或桌面 GUI 的 EXE。若系统拒绝启动 WindowsApps 中的内置程序，可改用独立安装的官方 Windows CLI。
+
+目前在 **macOS + Zotero 10.0.4** 实机验证。Windows 的程序发现逻辑有模拟测试，Windows / Linux 原生运行尚未实机验证。插件不内置或下载 Codex 二进制，其他机器仍需自行安装官方运行程序。Codex App Server 仍在演进，旧版本可能不支持部分接口。
 
 这是本地构建版本，尚未发布自动更新服务。Zotero 强制要求清单提供 `update_url`，因此填写了保留的 `.invalid` 域名作为明确不可用的占位地址；更新请重新安装新 XPI，正式发布时应换成真实的 HTTPS 更新清单。
 
@@ -71,6 +81,8 @@ npm run build
 `scripts/native-smoke.py` 准备一个**独立测试配置与空论文库**，仅用于开发检查，测试扩展不会打包进正式 XPI。测试结果写入 `.dev/native-result.json`，测试实例自行退出。再次使用同一 `-profile` 启动会执行跨进程重启验证，结果写入 `.dev/native-restart-result.json`。不要把测试配置覆盖到真实 Zotero 配置中。
 
 ## 验证范围
+
+0.3.1：31 项自动化测试、45 项 macOS 原生检查、5 项独立进程重启检查通过。新增 10 项 Windows 路径发现和错误恢复模拟测试；Windows 登录与解释仍待实机确认。详见 [验证记录](docs/verification.md)。
 
 0.3.0：21 项自动化测试、45 项原生检查、5 项独立进程重启恢复检查通过。
 

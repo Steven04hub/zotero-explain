@@ -5,8 +5,8 @@
   <meta charset="utf-8" />
   <meta name="color-scheme" content="light dark" />
   <title>论文解释</title>
-  <link rel="stylesheet" href="chrome://zotero-explain/content/panel.css?v=0.3.0" />
-  <script src="chrome://zotero-explain/content/panel.js?v=0.3.0" defer="defer"></script>
+  <link rel="stylesheet" href="chrome://zotero-explain/content/panel.css?v=0.3.1" />
+  <script src="chrome://zotero-explain/content/panel.js?v=0.3.1" defer="defer"></script>
 </head>
 <body>
   <header class="toolbar"><h1>论文解释</h1><span class="service">ChatGPT</span><button id="close" class="icon-button" aria-label="关闭解释窗口" title="关闭（⌘W）">×</button></header>
@@ -40,6 +40,7 @@
       <p>通过官方 Codex 服务解释，使用账号的 Codex 额度，无须 API Key。</p>
       <div class="row"><button id="logout" hidden="hidden">退出登录</button><button id="reconnect">重新连接</button></div>
       <label for="codexPath">Codex 运行程序</label><div class="row"><input id="codexPath" placeholder="留空则自动查找" /><button id="savePath">保存</button></div>
+      <small>Windows 商店版可自动查找；手动填写时请选择原生 codex.exe。清空并保存可恢复自动查找。</small>
       <small>登录在系统浏览器完成，独立于 Codex 桌面应用。</small>
     </details>
   </main>

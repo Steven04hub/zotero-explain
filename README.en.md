@@ -26,13 +26,15 @@ The plugin starts Codex directly over standard input/output. With a native execu
 
 On macOS, the plugin looks for Codex inside installed ChatGPT/Codex desktop applications and in common executable locations. If it cannot find Codex, install the official [Codex CLI](https://developers.openai.com/codex/cli), or provide the executable's absolute path under **账号与设置** (“Account and settings”).
 
-Use the native `codex` or `codex.exe` executable. On Windows, do not select `codex.cmd`. An npm launcher requires Node.js to be available in Zotero's process environment; a native binary is preferred.
+On Windows, version 0.3.1 queries the current user's `OpenAI.Codex` / `OpenAI.ChatGPT` Store package registrations using system PowerShell and resolves the bundled CLI (such as `app\resources\codex.exe`). It refreshes the location on each connection, including after Store updates and installations on other drives. It also checks `%LOCALAPPDATA%\Programs\OpenAI\Codex\bin\codex.exe`, `%LOCALAPPDATA%\OpenAI\Codex\bin\codex.exe`, the user's `.local\bin`, and PATH. No administrator access or WindowsApps permission changes are requested; package queries have a timeout and fall back to other locations on failure.
 
-Windows and Linux have not been tested on real machines. The plugin does not bundle or download Codex. App Server evolves over time, so older Codex versions may lack required interfaces.
+Use the native `codex` or `codex.exe` executable. On Windows, do not select `codex.cmd`, a shortcut, or the desktop GUI's `app\Codex.exe`. Quoted paths copied from Explorer and environment variables such as `%LOCALAPPDATA%` are accepted. **Clear the saved path and click Save to restore automatic discovery**, especially if an old manually configured path became invalid after an update. If Windows refuses to launch a bundled Store executable, install the official standalone Windows CLI and select its native executable instead.
+
+Windows discovery is covered by simulated tests; Windows and Linux have not been tested on real machines. The plugin does not bundle or download Codex. App Server evolves over time, so older Codex versions may lack required interfaces.
 
 ## Install and use
 
-1. Download [`zotero-explain-0.3.0.xpi`](dist/zotero-explain-0.3.0.xpi), or build it from source. Checksums are provided in [`dist/SHA256SUMS`](dist/SHA256SUMS).
+1. Download [`zotero-explain-0.3.1.xpi`](dist/zotero-explain-0.3.1.xpi), or build it from source. Checksums are provided in [`dist/SHA256SUMS`](dist/SHA256SUMS).
 2. In Zotero, open **Tools → Plugins**. Drag the XPI into the window, or use the gear menu's **Install Plugin From File…** option.
 3. Open **Tools → 论文解释 · ChatGPT**, then click **登录 ChatGPT** (“Sign in to ChatGPT”). Complete sign-in on the official OpenAI page in your browser and return to Zotero.
 4. Open a PDF, select a sentence or passage, and click **✦ 用 ChatGPT 解释** in the selection popup.
@@ -110,6 +112,8 @@ The test instance exits after writing `.dev/native-result.json`. Run the same Zo
 `node scripts/probe-codex.cjs` checks real App Server initialization, signed-out account state, official login URL generation, and login cancellation. It uses an isolated configuration, does not open a browser, and does not submit model requests.
 
 ### Verification
+
+For **0.3.1**, 31 automated tests (including 10 new Windows discovery/error-handling simulations), 45 native checks on macOS, and 5 separate-process persistence checks passed. Windows Store permissions, PowerShell execution, sign-in, and generation still require testing on a real Windows machine. Reports: [native](docs/native-verification-0.3.1.json) / [restart](docs/restart-verification-0.3.1.json).
 
 For **0.3.0**, 21 automated tests, 45 native checks, and 5 startup/persistence checks passed on macOS with Zotero 10.0.4. Native checks include explicitly labeled mock-backend tests. A real ChatGPT-authenticated explanation using GPT-6 Sol / medium was verified during 0.2.0 development. Windows/Linux operation and server-side quota exhaustion have not been verified.
 
