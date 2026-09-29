@@ -1,107 +1,83 @@
-# 论文解释 · ChatGPT
+# Zotero Explain · ChatGPT
 
-**简体中文** | [English](README.en.md)
+**English** | [简体中文](README.zh-CN.md)
 
-适配 Zotero 10 的桌面插件。选中论文中的文字，通过 **ChatGPT 账号登录官方 Codex App Server** 获取中文解释，在 Zotero 紧凑面板中显示，并可继续追问。
+Explain selected passages from papers in Zotero using your ChatGPT account. No API key is required. Answers stream into a floating panel beside the passage, where you can ask follow-up questions.
 
-不需要 API Key。使用的是账号的 **Codex 可用模型和额度**，不是 ChatGPT 网页聊天的模型选择器或聊天记录。账号必须具有可用的 Codex 权限与额度。
+The plugin uses the **official Codex App Server** and your account's **Codex access, available models, and usage limits**. The plugin interface and default explanations are currently in Simplified Chinese. Documentation is available in English and [Simplified Chinese](README.zh-CN.md).
 
-## 安装和使用
+## Features
 
-1. 下载 [zotero-explain-0.3.6.xpi](dist/zotero-explain-0.3.6.xpi)，或自行构建。校验和见 [SHA256SUMS](dist/SHA256SUMS)。
-2. 在 Zotero 中打开 **工具 → 插件**，将 XPI 拖入窗口，或使用齿轮菜单的“从文件安装插件”。
-3. 打开 **工具 → 论文解释 · ChatGPT**，点击“登录 ChatGPT”。在系统浏览器的 OpenAI 官方页面完成登录，再返回 Zotero。
-4. 打开论文 PDF，选中一句或一段文字，在选区弹出框中点击 **✦ 用 ChatGPT 解释**。
-5. 在解释窗口确认原文，按需补充前后段落，点击“解释”。首次使用默认为 **GPT-6 Sol，思考度中等**；可打开模型和思考度菜单选择，之后会记住最近一次选择。支持停止生成、继续追问或复制回答。
+- Select a passage in a PDF, review it, and optionally add surrounding context before requesting an explanation.
+- Stream explanations, ask follow-up questions, stop generation, and copy answers.
+- Choose a model and reasoning effort. Both preferences are remembered across panel closures, plugin reloads, and Zotero restarts. New profiles start with **GPT-6 Sol / medium**.
+- Drag the title bar or six-dot handle to move the panel freely to either side of the reader. Selecting another passage restores automatic selection avoidance.
+- Resize from all four edges or any corner. The panel retains your requested size while open, can temporarily shrink to avoid selected text, and stays within the reader window.
+- Keep reading in macOS fullscreen, with light and dark appearances. The panel floats over the paper without reserving a full-height sidebar; the paper remains visible below and around it.
 
-插件不会自动发送整篇论文。选中文字但没有点击“解释”时，不会提交模型请求。扫描版 PDF 需要先具有可选择的文字层。
+You can also focus the title bar or a resize handle and use arrow keys. The default content size is 460 × 600; closing and reopening restores it. The normal minimum is 322 × 262, with smaller reader windows taking priority so the controls remain reachable.
 
-## 0.3.6 面板下方空白修复
+## Install and use
 
-- 移除整列侧栏预留：面板始终浮在阅读器上，面板下方和周围继续显示论文，不再出现挡住论文的整块灰色空白。
-- 选区滚出屏幕或暂时拿不到坐标时，保留浮动位置，不改变阅读器宽度。
-- 空间不足时只缩小面板；整页选区等确实无法完全避让的情况仍保持浮动，可手动移动。保留四边缩放及新选区自动避让。
+1. Download [`zotero-explain-0.3.6.xpi`](https://github.com/Steven04hub/zotero-explain/releases/download/v0.3.6/zotero-explain-0.3.6.xpi) from the [latest release](https://github.com/Steven04hub/zotero-explain/releases/latest). The release also includes [`SHA256SUMS`](https://github.com/Steven04hub/zotero-explain/releases/download/v0.3.6/SHA256SUMS).
+2. In Zotero, open **Tools → Plugins**. Drag the XPI into the window, or use the gear menu's **Install Plugin From File…** option.
+3. Open **Tools → 论文解释 · ChatGPT**, then click **登录 ChatGPT** (“Sign in to ChatGPT”). Complete sign-in on the official OpenAI page in your browser and return to Zotero.
+4. Open a PDF, select a sentence or passage, and click **✦ 用 ChatGPT 解释** in the selection popup.
+5. Check the source text, optionally expand **补充上下文** (“Additional context”), choose a model and effort, and click **解释** (“Explain”).
+6. Use the follow-up field to continue the conversation, or close only the panel with its close button, Escape, or ⌘W / Ctrl+W while focused in the panel. The reader remains open and keeps its fullscreen state.
 
-## 0.3.5 四边缩放
+Selecting text does not send a model request. The plugin sends the selected passage, paper title, and any context you add only when you click Explain. It does not automatically upload the entire paper. Scanned PDFs need a selectable text layer.
 
-- 鼠标移到面板上、下、左、右边缘即可拖动放大或缩小；四个角支持同时调整宽高，右下角有缩放提示。
-- 拖动一条边时，对侧保持不动。正常最小尺寸为 322 × 262；最大尺寸受当前 Zotero 窗口限制，小窗口会进一步收缩以保持边缘可操作。
-- 面板打开期间保留手动尺寸，移动或滚动不会重置；新选区仍自动避让，空间不够时可临时收缩。关闭后重新打开恢复默认尺寸。
-- 高度较小时可滚动内容，窄面板中的模型/思考度与解释按钮自动换行。键盘聚焦边缘后也可用方向键缩放。
+## What's new in 0.3.6
 
-## 0.3.4 自由拖动修复
+Fixed the gray blank area below the panel that could cover the paper. When selected text scrolls offscreen or its position cannot be determined, the panel keeps its floating position without narrowing the reader. Crowded layouts shrink the panel; you can move it manually when a selection leaves no clear space.
 
-- 手动拖动优先：按住标题栏可自由移动到窗口左右两边，即使经过当前选中文字也不会被拉回。
-- 从右侧预留侧栏拖出时，立即恢复论文阅读区域，并保持拖动前的面板尺寸；只限制面板不超出窗口边界。
-- 松手后保持手动位置，滚动、调整窗口大小、重复打开同一选区都不会重新吸附右侧。选择另一段文字后恢复自动避让。
+This release also includes the free dragging improvements from 0.3.4 and resizing from all four edges and corners from 0.3.5. See the [release notes](https://github.com/Steven04hub/zotero-explain/releases/tag/v0.3.6) for installation and validation details.
 
-## 0.3.3 拖动与选区避让
+## Requirements
 
-- 按住面板顶部标题栏或右侧的六点手柄拖动；也可聚焦标题栏后使用方向键移动。面板不会被拖出窗口边界。
-- 打开面板、改变选区或滚动论文时，根据所选文字的实际位置自动避让；右栏选区优先使用左侧可用空间，也会考虑上方和下方。
-- 空间不足时适当缩小面板，必要时临时为阅读器留出侧栏；关闭后恢复阅读区域。
-- 保持全屏内嵌显示，不创建独立窗口。修复更新后残留旧入口或加载旧界面的问题。
+- **Zotero 10**. Tested on macOS with **Zotero 10.0.4**.
+- An official local **Codex executable** supporting App Server.
+- A ChatGPT account with available Codex access and usage allowance.
 
-## 0.3.2 全屏阅读修复
+The plugin starts Codex directly over standard input/output. With a native executable, it requires **no Node.js runtime, API key, or separately managed bridge service**. Explanation requests do not require a local HTTP server; the official sign-in flow may open a local OAuth callback listener.
 
-- 解释界面改为当前 Zotero 阅读器窗口内的浮动面板，不再创建独立系统窗口。macOS 全屏阅读时，论文和解释保持在同一个窗口与桌面空间。
-- 面板内容区最大为 460 × 600，小窗口下自动收缩；没有最小化按钮或打开动画。点击 ×、按 Escape 或在面板内按 ⌘W / Ctrl+W 只关闭面板，并取消当前回答。
-- 支持主窗口中的 PDF 标签页和独立 PDF 阅读器窗口。重复点击更新当前面板，切换到其他阅读器窗口时清理旧面板。
-- 登录方式、模型和 effort 偏好保持不变。
+On macOS, the plugin looks for Codex inside installed ChatGPT/Codex desktop applications and in common executable locations. If it cannot find Codex, install the official [Codex CLI](https://developers.openai.com/codex/cli), or provide the executable's absolute path under **账号与设置** (“Account and settings”).
 
-## 0.3.1 Windows 程序查找修复
+On Windows, the plugin queries the current user's `OpenAI.Codex` / `OpenAI.ChatGPT` Store package registrations using system PowerShell and resolves the bundled CLI (such as `app\resources\codex.exe`). It refreshes the location on each connection, including after Store updates and installations on other drives. It also checks `%LOCALAPPDATA%\Programs\OpenAI\Codex\bin\codex.exe`, `%LOCALAPPDATA%\OpenAI\Codex\bin\codex.exe`, the user's `.local\bin`, and PATH. No administrator access or WindowsApps permission changes are requested; package queries have a timeout and fall back to other locations on failure.
 
-- Windows 商店版：通过系统 PowerShell 的 `Get-AppxPackage` 查询当前用户安装的 `OpenAI.Codex` / `OpenAI.ChatGPT`，定位应用内的原生 CLI。每次连接重新查询，可适应商店更新后的版本目录及其他磁盘的安装位置。
-- 同时检查用户目录下常见的独立 CLI 路径。查询失败或超时会继续查找，不修改 WindowsApps 权限、不请求管理员权限。
-- 手动路径支持资源管理器“复制文件地址”带的双引号和 `%LOCALAPPDATA%` 等环境变量。无法访问文件、路径失效与进程启动失败会显示对应提示。
-- 升级后若仍保留以前手动填写的错误路径，在“账号与设置”中**清空 Codex 路径并保存**，即可恢复自动查找。
-- Windows 分支已通过模拟测试，仍需 Windows 实机验证登录与解释；不代表所有商店权限策略均可启动内置 CLI。
+Use the native `codex` or `codex.exe` executable. On Windows, do not select `codex.cmd`, a shortcut, or the desktop GUI's `app\Codex.exe`. Quoted paths copied from Explorer and environment variables such as `%LOCALAPPDATA%` are accepted. **Clear the saved path and click Save to restore automatic discovery**, especially if an old manually configured path became invalid after an update. If Windows refuses to launch a bundled Store executable, install the official standalone Windows CLI and select its native executable instead.
 
-## 0.3.0 思考度与偏好记忆
+Windows discovery is covered by simulated tests; Windows and Linux have not been tested on real machines. The plugin does not bundle or download Codex. App Server evolves over time, so older Codex versions may lack required interfaces.
 
-- 点击模型旁的思考度按钮选择 effort，菜单只显示该模型返回的可用档位。
-- 模型和 effort 选择后立即写入 Zotero 配置文件，无需手动保存；关闭窗口、退出并重新启动 Zotero、禁用再启用插件后仍会恢复。
-- 切换模型时保留兼容的 effort；若新模型不支持，则按其默认档位调整并提示，同时保存新组合。
-- 解释和后续追问都使用当前选择。暂时无法取得模型目录或已保存的模型暂不可用时，不会悄悄丢弃模型偏好；不可用模型需要用户选择其他可用模型才能继续。
-- 偏好只包含模型名称和 effort，不包含账号凭据或论文原文。
+## Model and effort preferences
 
-## 0.2.0 界面更新（历史）
+Selections are saved immediately to the Zotero profile; there is no separate Save step. Only the model identifier and effort are stored in these preferences, not credentials or paper text.
 
-- 面板内容区缩小为 460 × 600，采用 macOS 风格的系统字体、浅色分层、圆角控件和深色模式。账号与运行选项折叠在设置区。
-- 禁用最小化和窗口缩放，抑制窗口动画。点击关闭按钮、按 Escape 或 ⌘W 直接关闭；关闭时取消正在生成的回答。
-- 模型选择改为窗口内菜单，支持键盘方向键、点击选择和长模型名，避免原生 HTML 下拉框在 Zotero 特权窗口中的显示问题。
-- 当时默认发送 `gpt-6-sol` 和 `medium`，不再依赖账号默认值。0.3.0 起扩展为可选择并记忆思考度。
-- 样式与脚本带版本标识，更新插件即可加载新界面，无须为刷新样式重启 Zotero。
+When switching models, a compatible effort is retained. If the new model does not support it, the plugin chooses a supported setting, displays a notice, and saves the new combination. Both initial explanations and follow-up requests use the current settings.
 
-外观参考 [Apple 面板设计规范](https://developer.apple.com/design/human-interface-guidelines/panels)；模型和思考度参数依据 [Codex App Server](https://learn.chatgpt.com/docs/app-server)。
+A temporary catalog failure or an unavailable saved model does not silently reset the saved model. If that model is unavailable, select another available model to continue.
 
-## 运行依赖
+## Authentication and data handling
 
-插件直接启动本机官方 Codex 运行程序，通过标准输入输出通信。**不需要 Node.js、API Key、单独启动桥接服务或开放本地 HTTP 端口来解释文字**。官方登录流程会按需使用本机 OAuth 回调端口。
+- Authentication and token refresh are handled by the official Codex executable. The plugin does not collect passwords or implement its own OAuth token exchange.
+- Codex uses a separate `zotero-explain` directory within the Zotero profile. The plugin does not import existing Codex desktop login credentials.
+- Credential storage uses Codex's `auto` policy: system credential storage when available, with the official local-file fallback.
+- Signing out affects this plugin's isolated Codex login.
+- Requests contain the selected passage, paper title, optional context, and follow-up questions. Treat these as information sent to OpenAI under your account/workspace settings.
+- Conversations use ephemeral threads and are released when the panel closes. This is not a promise of zero server-side retention.
+- Responses are rendered as plain text. Shell, browser, app, and other agent tool features are disabled; the plugin requests a read-only sandbox and declines server-initiated tool approval requests.
+- Disabling or uninstalling the plugin removes its menus and reader handlers, closes its panel, and stops its Codex subprocess. The isolated configuration directory is retained; sign out before uninstalling if you want to remove the plugin's active login.
 
-macOS 会优先查找已安装的 ChatGPT / Codex 桌面应用中的原生 Codex 程序，再查找常见命令路径。这台开发机器已安装相应程序。
+## Updates
 
-Windows 会查询 Microsoft Store 注册的安装目录，并查找其中的 `app\resources\codex.exe` 等内置 CLI 位置；不会使用桌面 GUI 的 `app\Codex.exe`。也会查找 `%LOCALAPPDATA%\Programs\OpenAI\Codex\bin\codex.exe`、`%LOCALAPPDATA%\OpenAI\Codex\bin\codex.exe`、用户 `.local\bin` 和 PATH。
+Automatic updates are not configured. Install a new XPI to upgrade.
 
-若提示未找到程序：安装官方 [Codex CLI](https://developers.openai.com/codex/cli)，或在插件的“账号与设置”中指定原生 `codex` / `codex.exe` 的绝对路径。Windows 不要填写 `codex.cmd`、快捷方式或桌面 GUI 的 EXE。若系统拒绝启动 WindowsApps 中的内置程序，可改用独立安装的官方 Windows CLI。
+Zotero requires an `update_url` in the manifest. The current manifest uses a reserved `.invalid` placeholder, which intentionally does not provide updates. Hosting an automatic update service would require replacing it with a real HTTPS update manifest.
 
-目前在 **macOS + Zotero 10.0.4** 实机验证。Windows 的程序发现逻辑有模拟测试，Windows / Linux 原生运行尚未实机验证。插件不内置或下载 Codex 二进制，其他机器仍需自行安装官方运行程序。Codex App Server 仍在演进，旧版本可能不支持部分接口。
+## Development
 
-这是本地构建版本，尚未发布自动更新服务。Zotero 强制要求清单提供 `update_url`，因此填写了保留的 `.invalid` 域名作为明确不可用的占位地址；更新请重新安装新 XPI，正式发布时应换成真实的 HTTPS 更新清单。
-
-## 数据和登录
-
-- 发送内容：论文标题、选中的文字、用户主动补充的上下文以及当前会话的追问。
-- 使用插件配置目录下独立的 `zotero-explain` 子目录作为子进程的 Codex 配置目录，不读取或复制用户现有 Codex 登录凭据。
-- 由官方 Codex 管理 OAuth 和令牌刷新；优先使用其系统凭据存储，无法使用时按官方 `auto` 策略退回本地文件。插件不接收密码，不实现自己的 OpenAI 令牌交换。
-- 点击“退出登录”只退出这个插件使用的独立 Codex 登录。
-- 临时线程不写入普通本地 Codex 对话列表，窗口关闭后释放会话；这不代表 OpenAI 端零保留，服务端数据规则取决于账号和工作区。
-- 插件只渲染纯文本，不把回答作为 HTML 执行。已关闭 shell、浏览器、应用连接、其他插件等工具能力，使用只读沙箱，拒绝服务器发起的工具授权请求。
-- 禁用或卸载插件会移除菜单与阅读器事件、关闭窗口并终止它启动的 Codex 子进程。卸载前可先退出登录；独立配置目录不会被自动删除。
-
-## 开发
-
-构建只需 Python 3；检查与单元测试需要 Node.js 20+，无 npm 第三方依赖。
+Building requires Python 3. Syntax checks and automated tests require Node.js 20 or newer. There are no third-party npm dependencies.
 
 ```sh
 npm run check
@@ -109,37 +85,63 @@ npm test
 npm run build
 ```
 
-源码分工：`addon/core.js` 管理协议、流式会话和提示；`platform.js` 管理 Gecko 子进程；`controller.js` 接入阅读器，`layout.js` 计算选区避让位置；`panel.*` 是解释窗口；`bootstrap.js` 管理生命周期。
+The build creates `dist/zotero-explain-<version>.xpi` as a reproducible ZIP archive. To verify the published installer:
 
-`scripts/native-smoke.py` 准备一个**独立测试配置与空论文库**，仅用于开发检查，测试扩展不会打包进正式 XPI。测试结果写入 `.dev/native-result.json`，测试实例自行退出。再次使用同一 `-profile` 启动会执行跨进程重启验证，结果写入 `.dev/native-restart-result.json`。不要把测试配置覆盖到真实 Zotero 配置中。
+```sh
+cd dist
+shasum -a 256 -c SHA256SUMS
+```
 
-## 验证范围
+### Source layout
 
-0.3.6：55 项自动化测试、99 项 macOS 原生检查通过。已在当前 Zotero 的实际论文中确认：选区滚出视野和缩短面板后，面板下方仍显示论文，不再留下整列空白。
+| Path | Purpose |
+| --- | --- |
+| `addon/bootstrap.js` | Plugin startup and shutdown |
+| `addon/controller.js` | Zotero menus, reader selection events, and panel positioning |
+| `addon/layout.js` | Coordinate conversion and selection avoidance |
+| `addon/core.js` | JSON-RPC transport, prompts, conversations, and effort handling |
+| `addon/platform.js` | Gecko subprocess management and persistent preferences |
+| `addon/panel.*` | Reading panel and model/effort menus |
+| `scripts/build.py` | Reproducible XPI packaging |
+| `tests/` | Dependency-free automated tests |
+| `docs/` | Verification reports |
 
-0.3.5：54 项自动化测试、98 项 macOS 原生检查、7 项独立进程重启检查通过。已安装到当前 Zotero，验证连续拖动顶部和右侧边缘调整尺寸。
+### Native integration checks
 
-0.3.4：50 项自动化测试、65 项 macOS 原生检查、7 项独立进程重启检查通过。已更新当前 Zotero，并在实际论文中验证面板可从右侧跨过左栏选区拖到左侧，松手后不弹回。
+`scripts/native-smoke.py` prepares an **isolated test profile and library** under `.dev/`. Its test extension is not included in the distributable XPI. Never point it at your normal Zotero profile.
 
-0.3.3：47 项自动化测试、59 项 macOS 原生检查、7 项独立进程重启检查通过。已在实际论文中验证右栏选区避让、标题栏鼠标拖动及更换选区后的自动移位。
+```sh
+python3 scripts/native-smoke.py
+/Applications/Zotero.app/Contents/MacOS/zotero -no-remote -profile "$PWD/.dev/zotero-test-profile" -ZoteroDebugText
+```
 
-0.3.2：36 项自动化测试、51 项 macOS 原生检查、7 项独立进程重启检查通过。包含全屏打开不新增系统窗口、关闭/快捷键保持全屏、窗口内嵌入、阅读器归属及卸载清理。
+The test instance exits after writing `.dev/native-result.json`. Run the same Zotero command again to check persistence across a full process restart; that result is written to `.dev/native-restart-result.json`.
 
-0.3.1：31 项自动化测试、45 项 macOS 原生检查、5 项独立进程重启检查通过。新增 10 项 Windows 路径发现和错误恢复模拟测试；Windows 登录与解释仍待实机确认。详见 [验证记录](docs/verification.md)。
+`node scripts/probe-codex.cjs` checks real App Server initialization, signed-out account state, official login URL generation, and login cancellation. It uses an isolated configuration, does not open a browser, and does not submit model requests.
 
-0.3.0：21 项自动化测试、45 项原生检查、5 项独立进程重启恢复检查通过。
+### Verification
 
-- 自动化测试覆盖：Unicode 与长度校验、官方登录 URL 校验、分包与乱序通信、错误与断线、请求超时、流式文本合并、提前完成、取消期间的竞态、拒绝工具授权。
-- 使用真实 Codex App Server 进行无凭据连接和账号状态验证。
-- `node scripts/probe-codex.cjs` 验证官方登录发起、登录 URL 域名及取消流程，不打开浏览器、不使用现有凭据、不提交模型请求。
-- 原生 Zotero 测试包含明确标记的模拟后端，用于检查界面中的流式显示、追问、退出登录与纯文本渲染。模拟结果不等于账号真实生成已通过。
-- 0.2.0 已在用户实际 Zotero 中验证登录状态恢复、真实模型菜单和 GPT-6 Sol / medium 的完整解释生成。另有 17 项自动化测试、37 项独立 Zotero 原生检查通过；详细范围见 `docs/verification.md`。测试不读取账号令牌或伪造真实登录状态。
+For **0.3.6**, 55 automated tests and 99 macOS native checks passed. Verified in the installed plugin that scrolling a selection offscreen and shortening the panel leave the paper visible underneath. Report: [native](docs/native-verification-0.3.6.json).
 
-## 官方接口依据
+For **0.3.5**, 54 automated tests, 98 macOS native checks, and 7 separate-process restart checks passed. Installed and verified consecutive top/right edge drags in the actual Zotero window. Reports: [native](docs/native-verification-0.3.5.json) / [restart](docs/restart-verification-0.3.5.json).
 
-- [Zotero 10 开发说明](https://www.zotero.org/support/dev/zotero_10_for_developers)
-- [Zotero 阅读器自定义事件](https://www.zotero.org/support/dev/zotero_7_for_developers#custom_reader_event_handlers)
+For **0.3.4**, 50 automated tests, 65 macOS native checks, and 7 separate-process restart checks passed. Updated the installed plugin and verified dragging across a real PDF selection from right to left without snapping back. Reports: [native](docs/native-verification-0.3.4.json) / [restart](docs/restart-verification-0.3.4.json).
+
+For **0.3.3**, 47 automated tests, 59 macOS native checks, and 7 separate-process restart checks passed. A real PDF was used to verify right-column selection avoidance, title-bar dragging, and automatic repositioning for a new selection. Reports: [native](docs/native-verification-0.3.3.json) / [restart](docs/restart-verification-0.3.3.json).
+
+For **0.3.2**, 36 automated tests, 51 native checks on macOS, and 7 separate-process startup/persistence checks passed. Fullscreen checks verify that opening the embedded panel creates no native window, closing it preserves fullscreen, and shortcuts close only the panel. Controller tests also cover detached reader ownership and cleanup. Reports: [native](docs/native-verification-0.3.2.json) / [restart](docs/restart-verification-0.3.2.json).
+
+For **0.3.1**, 31 automated tests (including 10 new Windows discovery/error-handling simulations), 45 native checks on macOS, and 5 separate-process persistence checks passed. Windows Store permissions, PowerShell execution, sign-in, and generation still require testing on a real Windows machine. Reports: [native](docs/native-verification-0.3.1.json) / [restart](docs/restart-verification-0.3.1.json).
+
+For **0.3.0**, 21 automated tests, 45 native checks, and 5 startup/persistence checks passed on macOS with Zotero 10.0.4. Native checks include explicitly labeled mock-backend tests. A real ChatGPT-authenticated explanation using GPT-6 Sol / medium was verified during 0.2.0 development. Windows/Linux operation and server-side quota exhaustion have not been verified.
+
+See the [verification log](docs/verification.md) and machine-readable [native](docs/native-verification-0.3.0.json) / [restart](docs/restart-verification-0.3.0.json) reports.
+
+## References
+
+- [Zotero 10 developer notes](https://www.zotero.org/support/dev/zotero_10_for_developers)
+- [Zotero custom reader events](https://www.zotero.org/support/dev/zotero_7_for_developers#custom_reader_event_handlers)
 - [Codex App Server](https://developers.openai.com/codex/app-server)
-- [ChatGPT 账号认证](https://developers.openai.com/codex/auth)
+- [ChatGPT account authentication](https://developers.openai.com/codex/auth)
 
-本项目为独立插件，与 Zotero / OpenAI 无隶属关系。
+This is an independent plugin, not affiliated with Zotero or OpenAI.
